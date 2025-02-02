@@ -1,7 +1,7 @@
 export const courses = [
     {
         "short_name": "SE1",
-        "name": "Software Engineering 1",
+        "name": "Softwareentwicklung I",
         "credits": 6,
         "semester": "winter",
         "intended_semester": 1,
@@ -12,7 +12,7 @@ export const courses = [
     },
     {
         "short_name": "IKON",
-        "name": "Introduction to Computer Networks",
+        "name": "Informatik im Kontext",
         "credits": 6,
         "semester": "winter",
         "intended_semester": 1,
@@ -34,7 +34,7 @@ export const courses = [
     },
     {
         "short_name": "RSB",
-        "name": "Requirements Engineering and Software Design",
+        "name": "Rechnerstrukturen und Betriebssysteme",
         "credits": 9,
         "semester": "winter",
         "intended_semester": 1,
@@ -45,7 +45,7 @@ export const courses = [
     },
     {
         "short_name": "SE2",
-        "name": "Software Engineering 2",
+        "name": "Softwareentwicklung II",
         "credits": 6,
         "semester": "summer",
         "intended_semester": 2,
@@ -56,7 +56,7 @@ export const courses = [
     },
     {
         "short_name": "ALA",
-        "name": "Algorithms and Data Structures",
+        "name": "Algorithmen und Datenstrukturen",
         "credits": 9,
         "semester": "summer",
         "intended_semester": 2,
@@ -67,7 +67,7 @@ export const courses = [
     },
     {
         "short_name": "Pros",
-        "name": "ProSeminar",
+        "name": "Proseminar",
         "credits": 3,
         "semester": "both",
         "intended_semester": 2,
@@ -78,7 +78,7 @@ export const courses = [
     },
     {
         "short_name": "VSS",
-        "name": "Verification of Software Systems",
+        "name": "Verteilte Systeme und Systemsicherheit",
         "credits": 6,
         "semester": "summer",
         "intended_semester": 2,
@@ -89,7 +89,7 @@ export const courses = [
     },
     {
         "short_name": "ETI",
-        "name": "Ethics in Technology and Innovation",
+        "name": "Einführung in die Theoretische Informatik",
         "credits": 6,
         "semester": "summer",
         "intended_semester": 2,
@@ -100,7 +100,7 @@ export const courses = [
     },
     {
         "short_name": "AD",
-        "name": "Advanced Databases",
+        "name": "Algorithmen und Datenstrukturen",
         "credits": 6,
         "semester": "winter",
         "intended_semester": 3,
@@ -122,7 +122,7 @@ export const courses = [
     },
     {
         "short_name": "BKA",
-        "name": "Business Knowledge and Applications",
+        "name": "Berechenbarkeit, Komplexität und Approximation",
         "credits": 6,
         "semester": "summer",
         "intended_semester": 4,
@@ -155,7 +155,7 @@ export const courses = [
     },
     {
         "short_name": "Proj",
-        "name": "Project",
+        "name": "Projekt",
         "credits": 9,
         "semester": "both",
         "intended_semester": 5,
@@ -177,7 +177,7 @@ export const courses = [
     },
     {
         "short_name": "Abschlussmodul",
-        "name": "Final Module",
+        "name": "Abschlussmodul",
         "credits": 12,
         "semester": "both",
         "intended_semester": 6,
@@ -334,7 +334,7 @@ export const courses = [
     },
     {
         "short_name": "DMSV",
-        "name": "Digitale Medien- und Signalverarbeitung",
+        "name": "Digitale Mediensignalverarbeitung",
         "credits": 9,
         "semester": "summer",
         "intended_semester": null,
@@ -345,7 +345,7 @@ export const courses = [
     },
     {
         "short_name": "DV",
-        "name": "Datenvisualisierung",
+        "name": "Datenvisualisierung und GPU-Computing",
         "credits": 6,
         "semester": "summer",
         "intended_semester": null,
@@ -400,7 +400,7 @@ export const courses = [
     },
     {
         "short_name": "SWT",
-        "name": "SWT",
+        "name": "Softwaretechnik",
         "credits": 9,
         "semester": "summer",
         "intended_semester": null,
@@ -453,4 +453,4 @@ export const courses = [
         "elective": true,
         "color": "#ffffff"
     }
-]
+];

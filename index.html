@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Planner</title>
+    <title>Tetris</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -234,7 +234,7 @@ function dragOver(event) { //TODO: only if semester type matches
 function drop(event) {
     event.preventDefault();
 
-    restoreOpacity()
+    restoreOpacity();
 
     const targetSemesterGrid = event.target.closest('.grid');
     targetSemesterGrid.classList.remove('highlight');
@@ -252,7 +252,7 @@ function drop(event) {
         (!isWinterSemester && courseSemesterType === "winter")    // Summer semester but course is for winter
     ) {
         console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
-        setErrorMessage(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`)
+        setErrorMessage(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
         return;
     }
 
@@ -260,22 +260,18 @@ function drop(event) {
     const prerequisites = JSON.parse(draggedCourse.dataset.prerequisites);
     const creditsNeeded = parseInt(draggedCourse.dataset.credits_needed);
 
-    // console.log("prerequisites: " + prerequisites + " creditsNeeded: " + creditsNeeded);
-
     // Get all previous semesters (semesters before the target semester)
     const previousSemesters = Array.from(document.querySelectorAll('.semester'))
         .filter(semester => parseInt(semester.dataset.number) < semesterNumber);
 
-    const allSemesters = Array.from(document.querySelectorAll('.semester')) //maybe join with the previous semester thing
-    const allCourses = new Map()
+    const allSemesters = Array.from(document.querySelectorAll('.semester'));
+    const allCourses = new Map();
     allSemesters.forEach((semester, semesterIndex) => {
         const coursesInSemester = semester.querySelectorAll('.course');
         coursesInSemester.forEach(course => {
-            allCourses.set(course.dataset.short_name, semesterIndex+1);
+            allCourses.set(course.dataset.short_name, semesterIndex + 1);
         });
     });
-    // console.log("allCourses: ")
-    // console.log(allCourses)
 
     // Track completed courses and total credits from previous semesters
     const completedCourses = new Set();
@@ -295,10 +291,6 @@ function drop(event) {
             }
         });
     });
-
-    // console.log("previousSemesters:", previousSemesters);
-    // console.log("completedCourses:", Array.from(completedCourses));
-    // console.log("totalCreditsByPreviousSemester:", totalCreditsByPreviousSemester);
 
     // Check if prerequisites are met
     const prerequisitesMet = prerequisites.every(prerequisite => completedCourses.has(prerequisite));
@@ -321,18 +313,14 @@ function drop(event) {
 
     // Check if the dragged course is a prerequisite for any other course
     const courseName = draggedCourse.dataset.short_name;
-    console.log("courseName: "+courseName)
     if (courseDependencies[courseName]) {
-        console.log("courseDependencies[courseName]:")
-        console.log(courseDependencies[courseName])
-        for (const dependent of courseDependencies[courseName]) { // Check if that dependant will be broken by the move
+        for (const dependent of courseDependencies[courseName]) {
             if (!allCourses.has(dependent)) continue; // Skip if course not found
 
             const dependentSemester = allCourses.get(dependent);
-            if (semesterNumber >= dependentSemester) { 
+            if (semesterNumber >= dependentSemester) {
                 console.warn(`Moving ${courseName} will break prerequisites for ${dependent} (currently in semester ${dependentSemester})`);
                 setErrorMessage(`Moving ${courseName} will break prerequisites for ${dependent}`);
-
                 return;
             }
         }
@@ -343,7 +331,58 @@ function drop(event) {
     draggedCourse = null;
     clearErrorMessage();
     updateInfo();
+
+    // Check if the course was dropped into the last semester
+    const lastSemester = document.querySelector('.semester:last-child');
+    if (targetSemesterDiv === lastSemester) {
+        // Create a new semester
+        const newSemesterNumber = parseInt(lastSemester.dataset.number) + 1;
+        const newSemesterDiv = document.createElement('div');
+        newSemesterDiv.className = 'semester';
+        newSemesterDiv.dataset.number = newSemesterNumber;
+
+        const newSemesterTitle = document.createElement('p');
+        newSemesterTitle.textContent = `${newSemesterNumber}. FS`;
+        newSemesterDiv.appendChild(newSemesterTitle);
+
+        const newGridDiv = document.createElement('div');
+        newGridDiv.className = 'grid';
+        newSemesterDiv.appendChild(newGridDiv);
+
+        // Append the new semester to the semesters container
+        semestersContainer.appendChild(newSemesterDiv);
+        newGridDiv.addEventListener('dragleave', () => newGridDiv.classList.remove('highlight'));
+        newGridDiv.addEventListener('dragover', dragOver);
+        newGridDiv.addEventListener('drop', drop);
+    }
+
+        // Check and clean up empty semesters
+        cleanupEmptySemesters();
 }
+
+
+
+// Function to check and remove excess empty semesters
+function cleanupEmptySemesters() {
+    const semesters = Array.from(document.querySelectorAll('.semester'));
+    let lastNonEmptyIndex = -1;
+
+    // Find the last non-empty semester
+    for (let i = semesters.length - 1; i >= 0; i--) {
+        const semester = semesters[i];
+        const coursesInSemester = semester.querySelectorAll('.course');
+        if (coursesInSemester.length > 0) {
+            lastNonEmptyIndex = i;
+            break;
+        }
+    }
+
+    // Remove all empty semesters after the last non-empty one, except one
+    for (let i = semesters.length - 1; i > lastNonEmptyIndex + 1; i--) {
+        semesters[i].remove();
+    }
+}
+
 
 function setErrorMessage(msg) {
   const errorDiv = document.getElementById('error-message');
