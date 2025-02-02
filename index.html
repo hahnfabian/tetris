@@ -71,6 +71,7 @@
 </head>
 <body>
     <h1>Course Planner</h1>
+    <button id="clear-button">Clear Planner</button>
     <div id="electives" class="electives-container "></div>
     <div id="semesters" class="semester-container"></div>
     <div id="info-message"></div>
@@ -332,6 +333,8 @@ function drop(event) {
     clearErrorMessage();
     updateInfo();
 
+    
+
     // Check if the course was dropped into the last semester
     const lastSemester = document.querySelector('.semester:last-child');
     if (targetSemesterDiv === lastSemester) {
@@ -358,6 +361,7 @@ function drop(event) {
 
         // Check and clean up empty semesters
         cleanupEmptySemesters();
+        saveStateToLocalStorage();
 }
 
 
@@ -427,9 +431,255 @@ function updateInfo() {
     
     infoDiv.style.display = 'block'; // Show the error message div
 }
-
 updateInfo();
 
+
+//local storage
+function saveStateToLocalStorage() {
+    const semesters = Array.from(document.querySelectorAll('.semester'));
+    const state = semesters.map(semester => {
+        const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
+            return {
+                id: course.id,
+                short_name: course.dataset.short_name,
+                name: course.dataset.name,
+                credits: course.dataset.credits,
+                credits_needed: course.dataset.credits_needed,
+                semester: course.dataset.semester,
+                intendedSemester: course.dataset.intendedSemester,
+                prerequisites: JSON.parse(course.dataset.prerequisites),
+                isElective: course.dataset.isElective,
+                color: course.style.backgroundColor
+            };
+        });
+        return {
+            number: semester.dataset.number,
+            courses: courses
+        };
+    });
+
+    // Save the state to localStorage
+    localStorage.setItem('coursePlannerState', JSON.stringify(state));
+}
+
+function loadStateFromLocalStorage() {
+    const state = localStorage.getItem('coursePlannerState');
+    if (!state) return; // No saved state found
+
+    const semestersData = JSON.parse(state);
+
+    // Clear existing semesters
+    const semestersContainer = document.getElementById('semesters');
+    semestersContainer.innerHTML = '';
+
+    // Track which electives are already placed in semesters
+    const placedElectives = new Set();
+
+    // Recreate semesters and courses from the saved state
+    semestersData.forEach(semesterData => {
+        const semesterDiv = document.createElement('div');
+        semesterDiv.className = 'semester';
+        semesterDiv.dataset.number = semesterData.number;
+
+        const semesterTitle = document.createElement('p');
+        semesterTitle.textContent = `${semesterData.number}. FS`;
+        semesterDiv.appendChild(semesterTitle);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
+        semesterDiv.appendChild(gridDiv);
+
+        // Add courses to the grid
+        semesterData.courses.forEach(courseData => {
+            const courseSquare = document.createElement('div');
+            courseSquare.className = 'square course course-joined';
+            courseSquare.style.setProperty('--credits', courseData.credits / 3);
+            courseSquare.textContent = courseData.short_name;
+            courseSquare.draggable = true;
+            courseSquare.id = courseData.id;
+            courseSquare.style.backgroundColor = courseData.color;
+
+            courseSquare.dataset.short_name = courseData.short_name;
+            courseSquare.dataset.name = courseData.name;
+            courseSquare.dataset.credits = courseData.credits;
+            courseSquare.dataset.credits_needed = courseData.credits_needed;
+            courseSquare.dataset.semester = courseData.semester;
+            courseSquare.dataset.intendedSemester = courseData.intendedSemester;
+            courseSquare.dataset.prerequisites = JSON.stringify(courseData.prerequisites);
+            courseSquare.dataset.isElective = courseData.isElective;
+
+            // Drag and Drop event listeners
+            attachEventListenersToCourse(courseSquare);
+
+            gridDiv.appendChild(courseSquare);
+
+            // Track electives placed in semesters
+            if (courseData.isElective === 'true') {
+                placedElectives.add(courseData.short_name);
+            }
+        });
+
+        semestersContainer.appendChild(semesterDiv);
+    });
+
+    // Reset electives pool, excluding placed electives
+    const electivesDiv = document.getElementById('electives');
+    electivesDiv.innerHTML = ''; // Clear all electives
+
+    const electivesCourses = courses.filter(course => course.elective === true && !placedElectives.has(course.short_name));
+    electivesCourses.forEach(course => {
+        const credits = course.credits / 3; // Each square represents 3 credits
+        const courseSquare = document.createElement('div');
+        courseSquare.className = 'square course course-joined';
+        courseSquare.style.setProperty('--credits', credits);
+        courseSquare.textContent = course.short_name;
+        courseSquare.draggable = true;
+        courseSquare.id = `course-${course.id}`; // Unique ID for each course
+        courseSquare.style.backgroundColor = course.color;
+
+        courseSquare.dataset.short_name = course.short_name;
+        courseSquare.dataset.name = course.name;
+        courseSquare.dataset.credits = course.credits;
+        courseSquare.dataset.credits_needed = course.credits_needed;
+        courseSquare.dataset.semester = course.semester;
+        courseSquare.dataset.intendedSemester = course.intended_semester;
+        courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
+        courseSquare.dataset.isElective = course.elective;
+
+        // Drag and Drop event listeners
+        attachEventListenersToCourse(courseSquare);
+
+        electivesDiv.appendChild(courseSquare);
+    });
+
+    // Add event listeners to the new grids
+    document.querySelectorAll('.grid').forEach(grid => {
+        attachEventListenersToGrid(grid);
+    });
+}
+
+
+//clear 
+function clearPlanner() {
+    // Clear localStorage
+    localStorage.removeItem('coursePlannerState');
+
+    // Reset the UI to its initial state
+    const semestersContainer = document.getElementById('semesters');
+    semestersContainer.innerHTML = ''; // Clear all semesters
+
+    // Reinitialize the semesters
+    for (let semester = 1; semester <= 7; semester++) {
+        const semesterDiv = document.createElement('div');
+        semesterDiv.className = 'semester';
+        semesterDiv.dataset.number = semester;
+
+        const semesterTitle = document.createElement('p');
+        semesterTitle.textContent = `${semester}. FS`;
+        semesterDiv.appendChild(semesterTitle);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
+        semesterDiv.appendChild(gridDiv);
+
+        // Add courses to the grid
+        const semesterCourses = courses.filter(course => course.intended_semester === semester);
+        semesterCourses.forEach(course => {
+            const credits = course.credits / 3; // Each square represents 3 credits
+            const courseSquare = document.createElement('div');
+            courseSquare.className = 'square course course-joined';
+            courseSquare.style.setProperty('--credits', credits);
+            courseSquare.textContent = course.short_name;
+            courseSquare.draggable = true;
+            courseSquare.id = `course-${course.id}`; // Unique ID for each course
+            courseSquare.style.backgroundColor = course.color;
+
+            courseSquare.dataset.short_name = course.short_name;
+            courseSquare.dataset.name = course.name;
+            courseSquare.dataset.credits = course.credits;
+            courseSquare.dataset.credits_needed = course.credits_needed;
+            courseSquare.dataset.semester = course.semester;
+            courseSquare.dataset.intendedSemester = course.intended_semester;
+            courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
+            courseSquare.dataset.isElective = course.elective;
+
+            // Attach event listeners to the course square
+            attachEventListenersToCourse(courseSquare);
+
+            gridDiv.appendChild(courseSquare);
+        });
+
+        // Attach event listeners to the grid
+        attachEventListenersToGrid(gridDiv);
+
+        semestersContainer.appendChild(semesterDiv);
+    }
+
+    // Reset electives
+    const electivesDiv = document.getElementById('electives');
+    electivesDiv.innerHTML = ''; // Clear all electives
+
+    const electivesCourses = courses.filter(course => course.elective === true);
+    electivesCourses.forEach(course => {
+        const credits = course.credits / 3; // Each square represents 3 credits
+        const courseSquare = document.createElement('div');
+        courseSquare.className = 'square course course-joined';
+        courseSquare.style.setProperty('--credits', credits);
+        courseSquare.textContent = course.short_name;
+        courseSquare.draggable = true;
+        courseSquare.id = `course-${course.id}`; // Unique ID for each course
+        courseSquare.style.backgroundColor = course.color;
+
+        courseSquare.dataset.short_name = course.short_name;
+        courseSquare.dataset.name = course.name;
+        courseSquare.dataset.credits = course.credits;
+        courseSquare.dataset.credits_needed = course.credits_needed;
+        courseSquare.dataset.semester = course.semester;
+        courseSquare.dataset.intendedSemester = course.intended_semester;
+        courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
+        courseSquare.dataset.isElective = course.elective;
+
+        // Attach event listeners to the course square
+        attachEventListenersToCourse(courseSquare);
+
+        electivesDiv.appendChild(courseSquare);
+    });
+
+    // Update the info message
+    updateInfo();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadStateFromLocalStorage();
+
+    // Attach event listeners to all grids and courses
+    document.querySelectorAll('.grid').forEach(grid => {
+        attachEventListenersToGrid(grid);
+    });
+
+    document.querySelectorAll('.course').forEach(course => {
+        attachEventListenersToCourse(course);
+    });
+
+    // Add event listener to the clear button
+    const clearButton = document.getElementById('clear-button');
+    clearButton.addEventListener('click', clearPlanner);
+});
+
+
+
+
+function attachEventListenersToCourse(courseSquare) {
+    // Drag and Drop event listeners
+    courseSquare.addEventListener('dragstart', dragStart);
+    courseSquare.addEventListener('dragover', dragOver);
+    courseSquare.addEventListener('drop', drop);
+}
+function attachEventListenersToGrid(grid) {
+    grid.addEventListener('dragleave', () => grid.classList.remove('highlight'));
+    grid.addEventListener('dragover', dragOver);
+    grid.addEventListener('drop', drop);
+}
 
 </script>
 </body>
