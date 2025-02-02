@@ -71,467 +71,17 @@
 </head>
 <body>
     <h1>Course Planner</h1>
-    <div id="error-message" ></div>
     <div id="electives" class="electives-container "></div>
     <div id="semesters" class="semester-container"></div>
+    <div id="info-message"></div>
+    <div id="error-message" ></div>
+
+
     <script type="module" src="courses.js"></script>
-    <script>
-courses = [
-    {
-        "short_name": "SE1",
-        "name": "Software Engineering 1",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": 1,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#759fec"
-    },
-    {
-        "short_name": "IKON",
-        "name": "Introduction to Computer Networks",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": 1,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#759fec"
-    },
-    {
-        "short_name": "DM",
-        "name": "Discrete Mathematics",
-        "credits": 9,
-        "semester": "winter",
-        "intended_semester": 1,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "RSB",
-        "name": "Requirements Engineering and Software Design",
-        "credits": 9,
-        "semester": "winter",
-        "intended_semester": 1,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#c4cbd1"
-    },
-    {
-        "short_name": "SE2",
-        "name": "Software Engineering 2",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": 2,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#759fec"
-    },
-    {
-        "short_name": "ALA",
-        "name": "Algorithms and Data Structures",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": 2,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "Pros",
-        "name": "ProSeminar",
-        "credits": 3,
-        "semester": "both",
-        "intended_semester": 2,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#effdb2"
-    },
-    {
-        "short_name": "VSS",
-        "name": "Verification of Software Systems",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": 2,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#c4cbd1"
-    },
-    {
-        "short_name": "ETI",
-        "name": "Ethics in Technology and Innovation",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": 2,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "AD",
-        "name": "Advanced Databases",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": 3,
-        "prerequisites": ["SE1"],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "MK",
-        "name": "Methodenkompetenz",
-        "credits": 3,
-        "semester": "both",
-        "intended_semester": 3,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#effdb2"
-    },
-    {
-        "short_name": "BKA",
-        "name": "Business Knowledge and Applications",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": 4,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "Stoch1",
-        "name": "Stochastic Processes 1",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": 4,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#54fdfd"
-    },
-    {
-        "short_name": "Prak",
-        "name": "Praktikum",
-        "credits": 9,
-        "semester": "both",
-        "intended_semester": 4,
-        "prerequisites": ["SE1"],
-        "credits_needed": 51,
-        "elective": false,
-        "color": "#ff9a6c"
-    },
-    {
-        "short_name": "Proj",
-        "name": "Project",
-        "credits": 9,
-        "semester": "both",
-        "intended_semester": 5,
-        "prerequisites": ["SE1", "SE2", "Pros", "Prak"],
-        "credits_needed": 80,
-        "elective": false,
-        "color": "#ff9a6c"
-    },
-    {
-        "short_name": "Sem",
-        "name": "Seminar",
-        "credits": 3,
-        "semester": "both",
-        "intended_semester": 5,
-        "prerequisites": ["Pros"],
-        "credits_needed": 51,
-        "elective": false,
-        "color": "#ff9a6c"
-    },
-    {
-        "short_name": "Abschlussmodul",
-        "name": "Final Module",
-        "credits": 12,
-        "semester": "both",
-        "intended_semester": 6,
-        "prerequisites": ["SE1", "RSB", "DM", 
-                          "ALA", "VSS", "SE2", "ETI", "Pros",
-                          "AD", "MK", 
-                          "BKA", "Stoch1", "Prak" ],
-        "credits_needed": 0,
-        "elective": false,
-        "color": "#ec9393"
-    },
-    {
-        "short_name": "ATI",
-        "name": "Aktuelle Themen der Theoretischen Informatik",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "CN",
-        "name": "Rechnernetze",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "EML",
-        "name": "Einführung in das Maschinelle Lernen",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "GDB",
-        "name": "Grundlagen von Datenbanken",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "ICG",
-        "name": "Interaktive Computergrafik",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "HLR",
-        "name": "Hochleistungsrechnen",
-        "credits": 9,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": ["SE1"],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "MAKS",
-        "name": "Modellierung und Analyse komplexer Systeme",
-        "credits": 9,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "PM",
-        "name": "Projektmanagement",
-        "credits": 3,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "OPT",
-        "name": "Optimierung für Studierende der Informatik",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "STO2",
-        "name": "Stochastik 2 für Studierende der Informatik",
-        "credits": 6,
-        "semester": "winter",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "BV",
-        "name": "Einführung in die Bildverarbeitung",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "DAIS",
-        "name": "Data-driven Intelligent Systems",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2", "ETI"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "DIG",
-        "name": "Datenschutz in der Informationsgesellschaft",
-        "credits": 3,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "DMSV",
-        "name": "Digitale Medien- und Signalverarbeitung",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "DV",
-        "name": "Datenvisualisierung",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "ES",
-        "name": "Eingebettete Systeme",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["RSB"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "ESM",
-        "name": "Einführung in die System-Medizin – Mit Big Data gegen Krebs und Volkskrankheiten",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "ID",
-        "name": "Interaktionsdesign",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2", "IKON"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "IGMO",
-        "name": "Informatikgestützte Gestaltung und Modellierung von Organisationen",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2", "IKON"],
-        "credits_needed": 51,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "SWT",
-        "name": "SWT",
-        "credits": 9,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2"],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "MOBS",
-        "name": "Moderne Betriebssysteme",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "PGIT",
-        "name": "Philosophie, Gesellschaft und IT",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "SEW",
-        "name": "Softwareentwurf",
-        "credits": 6,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    },
-    {
-        "short_name": "UrhR",
-        "name": "Urheberrecht in der Informationsgesellschaft",
-        "credits": 3,
-        "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": [],
-        "credits_needed": 0,
-        "elective": true,
-        "color": "#ffffff"
-    }
-]
+    <script type="module">
+    
+    import {courses} from './courses.js';
+
 
 const semestersContainer = document.getElementById('semesters');
 
@@ -626,6 +176,7 @@ electivesCourses.forEach(course => {
 
     electivesDiv.appendChild(courseSquare);
 });
+
 
 
 
@@ -791,6 +342,7 @@ function drop(event) {
     targetSemesterGrid.appendChild(draggedCourse);
     draggedCourse = null;
     clearErrorMessage();
+    updateInfo();
 }
 
 function setErrorMessage(msg) {
@@ -806,6 +358,39 @@ function setErrorMessage(msg) {
 function clearErrorMessage() {
   setErrorMessage(''); // Clears the message by passing an empty string
 }
+
+function updateInfo() {
+    const infoDiv = document.getElementById('info-message')
+
+    const semesters = Array.from(document.querySelectorAll('.semester'));
+    let totalCredits = 0;
+
+    semesters.forEach(semester => {
+        const coursesInSemester = semester.querySelectorAll('.course');
+        coursesInSemester.forEach(course => {
+            const courseCredits = parseInt(course.dataset.credits, 10);
+            if (!isNaN(courseCredits)) {
+                totalCredits += courseCredits;
+            } else {
+                console.warn(`Invalid credits for course: ${course.dataset.short_name}`, course.dataset.credits);
+            }
+        });
+    });
+
+    const differenceAbsolute = Math.abs(180 - totalCredits)
+    if (totalCredits === 180) {
+        infoDiv.textContent = "You have all necessary Credits."
+    } else if (totalCredits < 180) {
+        infoDiv.textContent = `You have ${totalCredits} Credits and need ${differenceAbsolute} more.`
+    } else if (totalCredits > 180) {
+        infoDiv.textContent = `You have ${totalCredits} Credits which is ${differenceAbsolute} more than you need.`
+    }
+    
+    infoDiv.style.display = 'block'; // Show the error message div
+}
+
+updateInfo();
+
 
 </script>
 </body>
