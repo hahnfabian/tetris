@@ -19,6 +19,9 @@
             padding: 5px;
             margin-bottom: 10px;
         }
+        .electives-container.highlight {
+            outline: 2px dashed #007bff;
+        }
 
         .semester {
             margin-bottom: 20px;
@@ -178,7 +181,9 @@ electivesCourses.forEach(course => {
     electivesDiv.appendChild(courseSquare);
 });
 
-
+electivesDiv.addEventListener('dragover', dragOver);
+electivesDiv.addEventListener('drop', drop);
+electivesDiv.addEventListener('dragleave', () => electivesDiv.classList.remove('highlight'));
 
 
 
@@ -227,9 +232,9 @@ function restoreOpacity() {
 }
 
 
-function dragOver(event) { //TODO: only if semester type matches
+function dragOver(event) { 
     event.preventDefault();
-    event.target.closest('.grid')?.classList.add('highlight');
+    event.target.closest('.grid, #electives')?.classList.add('highlight');
 }
 
 function drop(event) {
@@ -237,12 +242,37 @@ function drop(event) {
 
     restoreOpacity();
 
-    const targetSemesterGrid = event.target.closest('.grid');
-    targetSemesterGrid.classList.remove('highlight');
+    const target = event.target.closest('.grid, #electives');
 
-    if (!targetSemesterGrid || !draggedCourse) return;
+    if (!target || !draggedCourse) return;
+    target.classList.remove('highlight');
 
-    const targetSemesterDiv = targetSemesterGrid.closest('.semester');
+    if (target.id === 'electives') {
+        const isElective = draggedCourse.dataset.isElective === "true";
+        if (!isElective) {
+            setErrorMessage("Cannot put non elective in elective pool.");
+            return;
+        }
+
+        if (!isElective) {
+            setErrorMessage("Cannot put non elective in elective pool.");
+            return;
+        }
+
+        // Move the course back to the electives pool
+        target.appendChild(draggedCourse);
+        draggedCourse = null;
+        clearErrorMessage();
+        updateInfo();
+
+        // Save the state to localStorage
+        saveStateToLocalStorage();
+        return;
+    }
+
+
+
+    const targetSemesterDiv = target.closest('.semester');
     const semesterNumber = parseInt(targetSemesterDiv.dataset.number);
     const isWinterSemester = semesterNumber % 2 !== 0;
     const courseSemesterType = draggedCourse.dataset.semester;
@@ -328,7 +358,7 @@ function drop(event) {
     }
 
     // If all checks pass, move the course to the target semester
-    targetSemesterGrid.appendChild(draggedCourse);
+    target.appendChild(draggedCourse);
     draggedCourse = null;
     clearErrorMessage();
     updateInfo();
