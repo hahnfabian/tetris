@@ -91,12 +91,17 @@ button:hover {
     display: none;
 }
 
-#info-message {
+.isFulfilled {
     background-color: #d4edda;
     color: #155724;
+}
+.notFulfilled {
+    background-color: #f0f0f0;
+    color: black;
 }
 
 #error-message {
     background-color: #f8d7da;
     color: #721c24;
 }
+
