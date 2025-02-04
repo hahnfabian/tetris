@@ -145,7 +145,7 @@ export const courses = [
     {
         "short_name": "Prak",
         "name": "Praktikum",
-        "credits": 9,
+        "credits": 6,
         "semester": "both",
         "intended_semester": 4,
         "prerequisites": ["SE1"],
