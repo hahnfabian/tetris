@@ -1,7 +1,144 @@
 import {courses} from './data/courses.js';
 
-// Freie Wahl #ffcc82
+
+
+const overlay = document.getElementById('overlay');
+const closeOverlayButton = document.getElementById('closeOverlay');
+
+// Show the overlay when the open button is clicked
+
+// Hide the overlay when the close button is clicked
+closeOverlayButton.addEventListener('click', () => {
+    overlay.style.display = 'none';
+});
+
+// Close the overlay when clicking outside of the content area
+overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+        overlay.style.display = 'none';
+    }
+});
+
+// Close the overlay when the Escape key is pressed
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        overlay.style.display = 'none';
+    }
+});
+
+// This function will populate the overlay with the course's details
+function showCourseDetails(course) {
+    const overlayContent = document.querySelector('.overlay-content');
+    
+    // Clear any existing content in the overlay
+    overlayContent.innerHTML = '';
+
+    // Add the course details to the overlay
+    const courseTitle = document.createElement('h2');
+    courseTitle.textContent = course.dataset.name;  // Course name
+    overlayContent.appendChild(courseTitle);
+
+    const courseShortName = document.createElement('p');
+    courseShortName.textContent = `Short Name: ${course.dataset.short_name}`;  // Short name
+    overlayContent.appendChild(courseShortName);
+
+    const courseSemesterType = document.createElement('p');
+    courseSemesterType.textContent = `Semester Type: ${course.dataset.semester}`;  // Credits
+    overlayContent.appendChild(courseSemesterType);
+
+    const courseCredits = document.createElement('p');
+    courseCredits.textContent = `Credits: ${course.dataset.credits}`;  // Credits
+    overlayContent.appendChild(courseCredits);
+
+    const coursePrerequisites = document.createElement('p');
+    const prerequisites = JSON.parse(course.dataset.prerequisites);
+    coursePrerequisites.textContent = `Prerequisites: ${prerequisites.length > 0 ? prerequisites.join(', ') : 'None'}`;  // Prerequisites
+    overlayContent.appendChild(coursePrerequisites);
+
+    const courseIsElective = document.createElement('p');
+    courseIsElective.textContent = `Elective: ${course.dataset.isElective === 'true' ? 'Yes' : 'No'}`;  // Elective or not
+    overlayContent.appendChild(courseIsElective);
+
+    // Add the Close button to the overlay
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.id = 'closeOverlay';
+    closeBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+    });
+    overlayContent.appendChild(closeBtn);
+
+    // Show the overlay
+    overlay.style.display = 'flex';
+}
+
+
+
+
 const freieWahlContainer = document.getElementById('freie-wahl');
+const freieWahlNameInput = document.getElementById('freie-wahl-name');
+const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
+const addFreieWahlButton = document.getElementById('add-freie-wahl');
+
+function addFreieWahlClass(name, credits) {
+    if (!name || credits <= 0) {
+        return;
+    }
+
+    const courseSquare = document.createElement('div');
+    courseSquare.className = 'square course course-joined';
+    courseSquare.style.setProperty('--credits', credits); 
+    courseSquare.textContent = `${name} (${credits} LP)`;
+    courseSquare.draggable = true;
+    courseSquare.id = `course-freiewahl-${Math.random().toString(36).substr(2, 9)}`;
+    courseSquare.style.backgroundColor = '#ffcc82';
+
+    // Store data attributes
+    Object.entries({
+        short_name: name,
+        name: name,
+        credits: credits,
+        credits_needed: 0,
+        semester: 'both',
+        intendedSemester: null,
+        prerequisites: "[]",
+        isElective: false,
+        isFreieWahl: true
+    }).forEach(([key, value]) => courseSquare.dataset[key] = value);
+
+    // Drag and Drop event listeners
+    courseSquare.addEventListener('dragstart', dragStart);
+    courseSquare.addEventListener('dragover', dragOver);
+    courseSquare.addEventListener('drop', drop);
+
+    courseSquare.addEventListener('click', () => {
+        showCourseDetails(courseSquare);
+    });
+
+
+
+    freieWahlContainer.appendChild(courseSquare);
+
+    // Clear input fields after adding
+    freieWahlNameInput.value = "";
+    freieWahlCreditsInput.value = "";
+}
+
+// Event listener for adding new courses
+addFreieWahlButton.addEventListener('click', () => {
+    const name = freieWahlNameInput.value.trim();
+    const credits = parseInt(freieWahlCreditsInput.value, 10);
+    addFreieWahlClass(name, credits);
+});
+
+// Drag and Drop event listeners for container
+freieWahlContainer.addEventListener('dragover', dragOver);
+freieWahlContainer.addEventListener('drop', drop);
+freieWahlContainer.addEventListener('dragleave', () => freieWahlContainer.classList.remove('highlight'));
+
+
+// Freie Wahl #ffcc82
+const freieWahlContainer2 = document.getElementById('freie-wahl');
 for (let freieWahlGröße = 1; freieWahlGröße <= 3; freieWahlGröße++) {
     const courseSquare = document.createElement('div');
     courseSquare.className = 'square course course-joined';
@@ -27,11 +164,15 @@ for (let freieWahlGröße = 1; freieWahlGröße <= 3; freieWahlGröße++) {
     courseSquare.addEventListener('dragover', dragOver);
     courseSquare.addEventListener('drop', drop);
 
-    freieWahlContainer.appendChild(courseSquare);
+    courseSquare.addEventListener('click', () => {
+        showCourseDetails(courseSquare);
+    });
+
+    freieWahlContainer2.appendChild(courseSquare);
 }
-freieWahlContainer.addEventListener('dragover', dragOver);
-freieWahlContainer.addEventListener('drop', drop);
-freieWahlContainer.addEventListener('dragleave', () => freieWahlContainer.classList.remove('highlight'));
+freieWahlContainer2.addEventListener('dragover', dragOver);
+freieWahlContainer2.addEventListener('drop', drop);
+freieWahlContainer2.addEventListener('dragleave', () => freieWahlContainer2.classList.remove('highlight'));
 
 
 
@@ -54,7 +195,7 @@ for (let semester = 1; semester <= 7; semester++) {
     const semesterDiv = document.createElement('div');
     semesterDiv.className = 'semester';
 
-    semesterDiv.dataset.number = semester
+    semesterDiv.dataset.number = semester;
 
     const semesterTitle = document.createElement('p');
     semesterTitle.textContent = `${semester}. FS`;
@@ -63,19 +204,17 @@ for (let semester = 1; semester <= 7; semester++) {
     const gridDiv = document.createElement('div');
     gridDiv.className = 'grid';
 
-
     // Add courses to the grid
     const semesterCourses = courses.filter(course => course.intended_semester === semester);
     semesterCourses.forEach(course => {
         const credits = course.credits / 3; // Each square represents 3 credits
         const courseSquare = document.createElement('div');
         courseSquare.className = 'square course course-joined';
-        courseSquare.style.setProperty('--credits', credits); 
+        courseSquare.style.setProperty('--credits', credits);
         courseSquare.textContent = course.short_name;
         courseSquare.draggable = true;
         courseSquare.id = `course-${course.id}`; // Unique ID for each course
-        courseSquare.style.backgroundColor = course.color
-
+        courseSquare.style.backgroundColor = course.color;
 
         courseSquare.dataset.short_name = course.short_name;
         courseSquare.dataset.name = course.name;
@@ -90,6 +229,11 @@ for (let semester = 1; semester <= 7; semester++) {
         courseSquare.addEventListener('dragstart', dragStart);
         courseSquare.addEventListener('dragover', dragOver);
         courseSquare.addEventListener('drop', drop);
+
+        // Add click event listener to open overlay with course details
+        courseSquare.addEventListener('click', () => {
+            showCourseDetails(courseSquare);
+        });
 
         gridDiv.appendChild(courseSquare);
     });
@@ -148,6 +292,10 @@ function renderElectives(filter = 'all') {
             courseSquare.addEventListener('dragstart', dragStart);
             courseSquare.addEventListener('dragover', dragOver);
             courseSquare.addEventListener('drop', drop);
+
+            courseSquare.addEventListener('click', () => {
+                showCourseDetails(courseSquare);
+            });
 
             electivesDiv.appendChild(courseSquare);
         }

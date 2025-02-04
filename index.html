@@ -8,17 +8,35 @@
 </head>
 <body>
     <h1>Course Planner</h1>
+    <button id="clear-button">Clear Planner</button>
+
+    <div id="freie-wahl" class="electives-container "></div>
+    <div id="freie-wahl-container">
+        <input type="text" id="freie-wahl-name" placeholder="Class Name">
+        <input type="number" id="freie-wahl-credits" placeholder="Credits (3, 6, 9)" min="3" step="3">
+        <button id="add-freie-wahl">Add Course</button>
+        <div id="freie-wahl"></div>
+    </div>
+
     <div id="button-container">
-        <button id="clear-button">Clear Planner</button>
         <button data-filter="all">Alle Module</button>
         <button data-filter="summer">Sommer Module</button>
         <button data-filter="winter">Winter Module</button>
     </div>
-    <div id="freie-wahl" class="electives-container "></div>
+
     <div id="electives" class="electives-container "></div>
     <div id="semesters" class="semester-container"></div>
     <div id="info-message"></div>
     <div id="error-message" ></div>
+    <!-- The Overlay -->
+    <div id="overlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Overlay Content</h2>
+            <p>This is the overlay content.</p>
+            <!-- Close Button -->
+            <button id="closeOverlay">Close</button>
+        </div>
+    </div>
 
 <script type="module" src="main.js"></script>
 </body>

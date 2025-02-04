@@ -104,7 +104,7 @@ export const courses = [
         "credits": 6,
         "semester": "winter",
         "intended_semester": 3,
-        "prerequisites": ["SE1"],
+        "prerequisites": [],
         "credits_needed": 0,
         "elective": false,
         "color": "#54fdfd"
@@ -133,7 +133,7 @@ export const courses = [
     },
     {
         "short_name": "Stoch1",
-        "name": "Stochastic Processes 1",
+        "name": "Stochastik 1",
         "credits": 6,
         "semester": "summer",
         "intended_semester": 4,
@@ -437,7 +437,7 @@ export const courses = [
         "credits": 6,
         "semester": "summer",
         "intended_semester": null,
-        "prerequisites": [],
+        "prerequisites": ["SE1", "SE2"],
         "credits_needed": 0,
         "elective": true,
         "color": "#ffffff"
