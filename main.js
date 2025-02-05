@@ -67,7 +67,7 @@ function showCourseDetails(course) {
     } else if (course.dataset.isFreieWahl === 'true') {
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = "Kurs löschen";
-        deleteBtn.id = 'toggleElectiveStatus';
+        deleteBtn.id = 'deleteFreieWahlBtn';
         deleteBtn.addEventListener('click', () => {
             deleteCourse(course);
         });
