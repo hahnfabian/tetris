@@ -102,7 +102,7 @@ function addFreieWahlClass(name, credits) {
 
     const courseSquare = document.createElement('div');
     courseSquare.className = 'square course course-joined';
-    courseSquare.style.setProperty('--credits', credits); 
+    courseSquare.style.setProperty('--credits', credits/3); 
     courseSquare.textContent = `${name} (${credits} LP)`;
     courseSquare.draggable = true;
     courseSquare.id = `course-freiewahl-${Math.random().toString(36).substr(2, 9)}`;

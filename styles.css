@@ -81,7 +81,7 @@ button:hover {
     cursor: grabbing;
 }
 .course-joined {
-    width: calc(50px * var(--credits) + 5px * (var(--credits) - 1));
+    width: calc(50px * var(--credits) + 5px * (var(--credits) / 3 - 0.166));
 }
 
 #info-message, #error-message {
