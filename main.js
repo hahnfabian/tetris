@@ -42,10 +42,6 @@ function showCourseDetails(course) {
     courseShortName.textContent = `Short Name: ${course.dataset.short_name}`;  // Short name
     overlayContent.appendChild(courseShortName);
 
-    const courseSemesterType = document.createElement('p');
-    courseSemesterType.textContent = `Semester Type: ${course.dataset.semester}`;  // Credits
-    overlayContent.appendChild(courseSemesterType);
-
     const courseCredits = document.createElement('p');
     courseCredits.textContent = `Credits: ${course.dataset.credits}`;  // Credits
     overlayContent.appendChild(courseCredits);
@@ -59,6 +55,18 @@ function showCourseDetails(course) {
     courseIsElective.textContent = `Elective: ${course.dataset.isElective === 'true' ? 'Yes' : 'No'}`;  // Elective or not
     overlayContent.appendChild(courseIsElective);
 
+    // Add the toggle button for elective status
+    if (course.dataset.isElective === 'true') {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.textContent = course.classList.contains('isMarkedAsFreieWahl') == false ? 'Als Freie Wahl anrechnen lassen' : 'Als Wahlpflicht anrechnen lassen';
+        toggleBtn.id = 'toggleElectiveStatus';
+        toggleBtn.addEventListener('click', () => {
+            toggleElectiveStatus(course);
+        });
+        overlayContent.appendChild(toggleBtn);
+    }
+
+
     // Add the Close button to the overlay
     const closeBtn = document.createElement('button');
     closeBtn.textContent = 'Close';
@@ -70,6 +78,13 @@ function showCourseDetails(course) {
 
     // Show the overlay
     overlay.style.display = 'flex';
+}
+
+function toggleElectiveStatus(course) {
+    course.classList.toggle('isMarkedAsFreieWahl');
+    // Update the overlay with the new status
+    showCourseDetails(course);
+    updateInfo();
 }
 
 
@@ -224,6 +239,8 @@ for (let semester = 1; semester <= 7; semester++) {
         courseSquare.dataset.intendedSemester = course.intended_semester;
         courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
         courseSquare.dataset.isElective = course.elective;
+        courseSquare.dataset.isFreieWahl = false;
+
 
         // Drag and Drop event listeners
         courseSquare.addEventListener('dragstart', dragStart);
@@ -502,9 +519,7 @@ function drop(event) {
     target.appendChild(draggedCourse);
     draggedCourse = null;
     clearErrorMessage();
-    updateInfo();
-
-    
+   
 
     // Check if the course was dropped into the last semester
     const lastSemester = document.querySelector('.semester:last-child');
@@ -530,9 +545,10 @@ function drop(event) {
         newGridDiv.addEventListener('drop', drop);
     }
 
-        // Check and clean up empty semesters
-        cleanupEmptySemesters();
-        saveStateToLocalStorage();
+    // Check and clean up empty semesters
+    cleanupEmptySemesters();
+    saveStateToLocalStorage();
+    updateInfo();
 }
 
 
@@ -596,10 +612,14 @@ function updateInfo() {
             const courseCredits = parseInt(course.dataset.credits, 10);
             const courseName = course.dataset.name;
 
-            if (course.dataset.isElective === "true") {
-                wahlpflichtCredits += courseCredits;
-                if (!foundAbschlussmodul) {
-                    foundElectiveBeforeAbschluss = true;
+            if (course.dataset.isElective === "true") { 
+                if (course.classList.contains('isMarkedAsFreieWahl')) {
+                    freieWahlCredits += courseCredits;
+                } else {
+                    wahlpflichtCredits += courseCredits;
+                    if (!foundAbschlussmodul) {
+                        foundElectiveBeforeAbschluss = true;
+                    }
                 }
             } else if (course.dataset.isFreieWahl === "true") {
                 freieWahlCredits += courseCredits;
@@ -670,32 +690,70 @@ updateInfo();
 
 
 //local storage
+// function saveStateToLocalStorage() {
+//     const semesters = Array.from(document.querySelectorAll('.semester'));
+//     const state = semesters.map(semester => {
+//         const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
+//             console.log(course.id + " " + course.classList.value)
+//             return {
+//                 id: course.id,
+//                 short_name: course.dataset.short_name,
+//                 name: course.dataset.name,
+//                 credits: course.dataset.credits,
+//                 credits_needed: course.dataset.credits_needed,
+//                 semester: course.dataset.semester,
+//                 intendedSemester: course.dataset.intendedSemester,
+//                 prerequisites: JSON.parse(course.dataset.prerequisites),
+//                 isElective: course.dataset.isElective,
+//                 color: course.style.backgroundColor,
+//                 isFreieWahl: course.dataset.isFreieWahl,
+//                 classnames: course.classList.value
+//             };
+//         });
+//         return {
+//             number: semester.dataset.number,
+//             courses: courses
+//         };
+//     });
+
+//     // Save the state to localStorage
+//     localStorage.setItem('coursePlannerState', JSON.stringify(state));
+// }
+let saveTimeout;
 function saveStateToLocalStorage() {
-    const semesters = Array.from(document.querySelectorAll('.semester'));
-    const state = semesters.map(semester => {
-        const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        const semesters = Array.from(document.querySelectorAll('.semester'));
+        const state = semesters.map(semester => {
+            const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
+                // console.log("Saving:", course.id, course.classList.value);
+                return {
+                    id: course.id,
+                    short_name: course.dataset.short_name,
+                    name: course.dataset.name,
+                    credits: course.dataset.credits,
+                    credits_needed: course.dataset.credits_needed,
+                    semester: course.dataset.semester,
+                    intendedSemester: course.dataset.intendedSemester,
+                    prerequisites: JSON.parse(course.dataset.prerequisites || "[]"),
+                    isElective: course.dataset.isElective === "true",
+                    color: course.style.backgroundColor,
+                    isFreieWahl: course.dataset.isFreieWahl === "true",
+                    classnames: course.classList.value
+                };
+            });
             return {
-                id: course.id,
-                short_name: course.dataset.short_name,
-                name: course.dataset.name,
-                credits: course.dataset.credits,
-                credits_needed: course.dataset.credits_needed,
-                semester: course.dataset.semester,
-                intendedSemester: course.dataset.intendedSemester,
-                prerequisites: JSON.parse(course.dataset.prerequisites),
-                isElective: course.dataset.isElective,
-                color: course.style.backgroundColor
+                number: semester.dataset.number,
+                courses: courses
             };
         });
-        return {
-            number: semester.dataset.number,
-            courses: courses
-        };
-    });
 
-    // Save the state to localStorage
-    localStorage.setItem('coursePlannerState', JSON.stringify(state));
+        localStorage.setItem('coursePlannerState', JSON.stringify(state));
+        // console.log("State saved:", state);
+    }, 200); // Adjust delay if needed
 }
+
+
 
 function loadStateFromLocalStorage() {
     const state = localStorage.getItem('coursePlannerState');
@@ -727,7 +785,7 @@ function loadStateFromLocalStorage() {
         // Add courses to the grid
         semesterData.courses.forEach(courseData => {
             const courseSquare = document.createElement('div');
-            courseSquare.className = 'square course course-joined';
+            courseSquare.className = courseData.classnames;
             courseSquare.style.setProperty('--credits', courseData.credits / 3);
             courseSquare.textContent = courseData.short_name;
             courseSquare.draggable = true;
@@ -742,6 +800,7 @@ function loadStateFromLocalStorage() {
             courseSquare.dataset.intendedSemester = courseData.intendedSemester;
             courseSquare.dataset.prerequisites = JSON.stringify(courseData.prerequisites);
             courseSquare.dataset.isElective = courseData.isElective;
+            courseSquare.dataset.isFreieWahl = courseData.isFreieWahl;
 
             // Drag and Drop event listeners
             attachEventListenersToCourse(courseSquare);
@@ -755,6 +814,7 @@ function loadStateFromLocalStorage() {
         });
 
         semestersContainer.appendChild(semesterDiv);
+        updateInfo();
     });
 
     // Reset electives pool, excluding placed electives
@@ -780,6 +840,7 @@ function loadStateFromLocalStorage() {
         courseSquare.dataset.intendedSemester = course.intended_semester;
         courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
         courseSquare.dataset.isElective = course.elective;
+        courseSquare.dataset.isFreieWahl = false;
 
         // Drag and Drop event listeners
         attachEventListenersToCourse(courseSquare);
@@ -837,6 +898,7 @@ function clearPlanner() {
             courseSquare.dataset.intendedSemester = course.intended_semester;
             courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
             courseSquare.dataset.isElective = course.elective;
+            courseSquare.dataset.isFreieWahl = false;
 
             // Attach event listeners to the course square
             attachEventListenersToCourse(courseSquare);
@@ -874,6 +936,7 @@ function clearPlanner() {
         courseSquare.dataset.intendedSemester = course.intended_semester;
         courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
         courseSquare.dataset.isElective = course.elective;
+        courseSquare.dataset.isFreieWahl = false;
 
         // Attach event listeners to the course square
         attachEventListenersToCourse(courseSquare);
@@ -908,6 +971,9 @@ function attachEventListenersToCourse(courseSquare) {
     courseSquare.addEventListener('dragstart', dragStart);
     courseSquare.addEventListener('dragover', dragOver);
     courseSquare.addEventListener('drop', drop);
+    courseSquare.addEventListener('click', () => {
+        toggleElectiveStatus(courseSquare);
+    });
 }
 function attachEventListenersToGrid(grid) {
     grid.addEventListener('dragleave', () => grid.classList.remove('highlight'));

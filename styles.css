@@ -128,4 +128,7 @@ button:hover {
     margin: auto;
 }
 
+.isMarkedAsFreieWahl {
+    background-color: #ffcc82 !important;
+}
 
