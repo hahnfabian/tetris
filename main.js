@@ -60,7 +60,9 @@ function showCourseDetails(course) {
         const toggleBtn = document.createElement('button');
         toggleBtn.textContent = course.classList.contains('isMarkedAsFreieWahl') == false ? 'Als Freie Wahl anrechnen lassen' : 'Als Wahlpflicht anrechnen lassen';
         toggleBtn.id = 'toggleElectiveStatus';
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click', (event) => {
+            // console.log("Toggle function executed", course);
+            event.stopPropagation();
             toggleElectiveStatus(course);
         });
         overlayContent.appendChild(toggleBtn);
@@ -652,10 +654,10 @@ function updateInfo() {
     const wahlpflichtDifference = wahlpflichtNeeded - wahlpflichtCredits;
     const freieWahlDifference = freieWahlNeeded - freieWahlCredits;
 
-    console.log(`Total Credits: ${totalCredits}, Difference: ${totalDifference}`);
-    console.log(`Wahlpflicht: ${wahlpflichtCredits}/${wahlpflichtNeeded}, Difference: ${wahlpflichtDifference}`);
-    console.log(`Freie Wahl: ${freieWahlCredits}/${freieWahlNeeded}, Difference: ${freieWahlDifference}`);
-    console.log(`Elective before Abschlussmodul: ${foundElectiveBeforeAbschluss}`);
+    // console.log(`Total Credits: ${totalCredits}, Difference: ${totalDifference}`);
+    // console.log(`Wahlpflicht: ${wahlpflichtCredits}/${wahlpflichtNeeded}, Difference: ${wahlpflichtDifference}`);
+    // console.log(`Freie Wahl: ${freieWahlCredits}/${freieWahlNeeded}, Difference: ${freieWahlDifference}`);
+    // console.log(`Elective before Abschlussmodul: ${foundElectiveBeforeAbschluss}`);
 
     // Create paragraph elements with class based on fulfillment status
     function createMessage(text, isFulfilled) {
