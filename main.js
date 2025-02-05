@@ -64,6 +64,14 @@ function showCourseDetails(course) {
             toggleElectiveStatus(course);
         });
         overlayContent.appendChild(toggleBtn);
+    } else if (course.dataset.isFreieWahl === 'true') {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = "Kurs löschen";
+        deleteBtn.id = 'toggleElectiveStatus';
+        deleteBtn.addEventListener('click', () => {
+            deleteCourse(course);
+        });
+        overlayContent.appendChild(deleteBtn);
     }
 
 
@@ -85,8 +93,15 @@ function toggleElectiveStatus(course) {
     // Update the overlay with the new status
     showCourseDetails(course);
     updateInfo();
+    saveStateToLocalStorage();
 }
 
+function deleteCourse(course) {
+    course.remove();
+    overlay.style.display = 'none';
+    updateInfo();
+    saveStateToLocalStorage();
+}
 
 
 
