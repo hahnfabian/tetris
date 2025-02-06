@@ -1,5 +1,5 @@
 import { createCourseSquare } from './CourseSquare.js';
-import { attachEventListenersToCourse } from '../utils/dragAndDrop.js';
+import { attachEventListenersToCourse } from '../utils/attachListeners.js';
 
 export function createFreieWahlPool() {
     const freieWahlContainer = document.getElementById('freie-wahl');
