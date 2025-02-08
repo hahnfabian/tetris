@@ -123,7 +123,9 @@ const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
 const addFreieWahlButton = document.getElementById('add-freie-wahl');
 
 function addFreieWahlClass(name, credits) {
+    clearErrorMessage();
     if (!name || credits <= 0 || isNaN(credits)) {
+        setErrorMessage("Freie Wahl Module brauchen einen Namen und eine Credit anzahl.");
         return;
     }
 
