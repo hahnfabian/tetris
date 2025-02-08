@@ -854,7 +854,7 @@ function loadStateFromLocalStorage() {
             gridDiv.appendChild(courseSquare);
 
             // Track electives placed in semesters
-            if (courseData.isElective === 'true') {
+            if (courseData.isElective === true || courseData.isElective === 'true') { //TODO: das wo es manchmal nur bool ist ist fucked
                 placedElectives.add(courseData.short_name);
             }
         });
