@@ -1022,7 +1022,7 @@ function attachEventListenersToCourse(courseSquare) {
     courseSquare.addEventListener('dragover', dragOver);
     courseSquare.addEventListener('drop', drop);
     courseSquare.addEventListener('click', () => {
-        toggleElectiveStatus(courseSquare);
+        showCourseDetails(courseSquare);
     });
 }
 function attachEventListenersToGrid(grid) {
