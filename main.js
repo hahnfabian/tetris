@@ -39,7 +39,7 @@ function showCourseDetails(course) {
     overlayContent.appendChild(courseTitle);
 
     const courseShortName = document.createElement('p');
-    courseShortName.textContent = `Short Name: ${course.dataset.short_name}`;  // Short name
+    courseShortName.textContent = `Abkürzung: ${course.dataset.short_name}`;  // Short name
     overlayContent.appendChild(courseShortName);
 
     const courseCredits = document.createElement('p');
@@ -48,11 +48,16 @@ function showCourseDetails(course) {
 
     const coursePrerequisites = document.createElement('p');
     const prerequisites = JSON.parse(course.dataset.prerequisites);
-    coursePrerequisites.textContent = `Prerequisites: ${prerequisites.length > 0 ? prerequisites.join(', ') : 'None'}`;  // Prerequisites
+    coursePrerequisites.textContent = `Voraussetzungen: ${prerequisites.length > 0 ? prerequisites.join(', ') : 'Keine'}`;  // Prerequisites
     overlayContent.appendChild(coursePrerequisites);
 
+    const creditsPrerequisites = document.createElement('p');
+    const creditsNeededOverlay = course.dataset.credits_needed; 
+    creditsPrerequisites.textContent = `Benötigte Credits: ${creditsNeededOverlay}`;  // Prerequisites
+    overlayContent.appendChild(creditsPrerequisites);
+
     const courseIsElective = document.createElement('p');
-    courseIsElective.textContent = `Elective: ${course.dataset.isElective === 'true' ? 'Yes' : 'No'}`;  // Elective or not
+    courseIsElective.textContent = `Wahlpflicht: ${course.dataset.isElective === 'true' ? 'Ja' : 'Nein'}`;  // Elective or not
     overlayContent.appendChild(courseIsElective);
 
     // Add the toggle button for elective status
@@ -60,6 +65,7 @@ function showCourseDetails(course) {
         const toggleBtn = document.createElement('button');
         toggleBtn.textContent = course.classList.contains('isMarkedAsFreieWahl') == false ? 'Als Freie Wahl anrechnen lassen' : 'Als Wahlpflicht anrechnen lassen';
         toggleBtn.id = 'toggleElectiveStatus';
+        toggleBtn.classList.add('button-spacing');
         toggleBtn.addEventListener('click', (event) => {
             // console.log("Toggle function executed", course);
             event.stopPropagation();
@@ -70,8 +76,10 @@ function showCourseDetails(course) {
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = "Kurs löschen";
         deleteBtn.id = 'deleteFreieWahlBtn';
-        deleteBtn.addEventListener('click', () => {
+        deleteBtn.classList.add('button-spacing');
+        deleteBtn.addEventListener('click', (event) => {
             deleteCourse(course);
+            event.stopPropagation();
         });
         overlayContent.appendChild(deleteBtn);
     }
@@ -81,7 +89,9 @@ function showCourseDetails(course) {
     const closeBtn = document.createElement('button');
     closeBtn.textContent = 'Close';
     closeBtn.id = 'closeOverlay';
-    closeBtn.addEventListener('click', () => {
+    closeBtn.classList.add('button-spacing');
+    closeBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
         overlay.style.display = 'none';
     });
     overlayContent.appendChild(closeBtn);
@@ -113,7 +123,7 @@ const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
 const addFreieWahlButton = document.getElementById('add-freie-wahl');
 
 function addFreieWahlClass(name, credits) {
-    if (!name || credits <= 0) {
+    if (!name || credits <= 0 || isNaN(credits)) {
         return;
     }
 
@@ -143,7 +153,8 @@ function addFreieWahlClass(name, credits) {
     courseSquare.addEventListener('dragover', dragOver);
     courseSquare.addEventListener('drop', drop);
 
-    courseSquare.addEventListener('click', () => {
+    courseSquare.addEventListener('click', (event) => {
+        event.stopPropagation();
         showCourseDetails(courseSquare);
     });
 
@@ -245,7 +256,7 @@ for (let semester = 1; semester <= 7; semester++) {
         courseSquare.style.setProperty('--credits', credits);
         courseSquare.textContent = course.short_name;
         courseSquare.draggable = true;
-        courseSquare.id = `course-${course.id}`; // Unique ID for each course
+        courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
         courseSquare.style.backgroundColor = course.color;
 
         courseSquare.dataset.short_name = course.short_name;
@@ -307,7 +318,7 @@ function renderElectives(filter = 'all') {
             courseSquare.style.setProperty('--credits', credits);
             courseSquare.textContent = course.short_name;
             courseSquare.draggable = true;
-            courseSquare.id = `course-${course.id}`;
+            courseSquare.id = `course-${course.short_name}`;
             courseSquare.style.backgroundColor = course.color;
 
             // Store course data as dataset attributes
@@ -335,10 +346,8 @@ function renderElectives(filter = 'all') {
         }
     });
 }
-document.getElementById('button-container').addEventListener('click', (event) => {
-    if (event.target.tagName === 'BUTTON' && event.target.dataset.filter) {
-        renderElectives(event.target.dataset.filter);
-    }
+document.getElementById('module-filter').addEventListener('change', (event) => {
+    renderElectives(event.target.value);
 });
 renderElectives();
 
@@ -412,7 +421,7 @@ function drop(event) {
         const isFreieWahl = draggedCourse.dataset.isFreieWahl === "true";
 
         if (!isFreieWahl) {
-            setErrorMessage("Cannot put non Freie Wahl in Freie Wahl pool.");
+            setErrorMessage("Nur Freie-Wahl-Module können in den Freie-Wahl-Pool gelegt werden.");
             return;
         }
 
@@ -430,7 +439,7 @@ function drop(event) {
     if (target.id === 'electives') {
         const isElective = draggedCourse.dataset.isElective === "true";
         if (!isElective) {
-            setErrorMessage("Cannot put non elective in elective pool.");
+            setErrorMessage("Nur Wahlmodule können in den Wahlmodul-Pool gelegt werden.");
             return;
         }
 
@@ -457,8 +466,8 @@ function drop(event) {
         (isWinterSemester && courseSemesterType === "summer") ||  // Winter semester but course is for summer
         (!isWinterSemester && courseSemesterType === "winter")    // Summer semester but course is for winter
     ) {
-        console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
-        setErrorMessage(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
+        // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Falscher Semestertyp.`);
         return;
     }
 
@@ -508,12 +517,12 @@ function drop(event) {
 
     // If prerequisites or credits are not met, block the move
     if (!prerequisitesMet) {
-        console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Course prerequisites not met:  ${missingPrerequisites}`);
-        setErrorMessage(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Course prerequisites not met: ${missingPrerequisites}`);
+        // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Course prerequisites not met:  ${missingPrerequisites}`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Fehlende Voraussetzungen: ${missingPrerequisites}`);
         return;
     } else if (!gotNeededCredits) {
-        console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. You need ${creditDifference} more credits.`);
-        setErrorMessage(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. You need ${creditDifference} more credits.`);
+        // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. You need ${creditDifference} more credits.`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Es fehlen noch ${creditDifference} Credits.`);
         return;
     }
 
@@ -525,8 +534,8 @@ function drop(event) {
 
             const dependentSemester = allCourses.get(dependent);
             if (semesterNumber >= dependentSemester) {
-                console.warn(`Moving ${courseName} will break prerequisites for ${dependent} (currently in semester ${dependentSemester})`);
-                setErrorMessage(`Moving ${courseName} will break prerequisites for ${dependent}`);
+                // console.warn(`Moving ${courseName} will break prerequisites for ${dependent} (currently in semester ${dependentSemester})`);
+                setErrorMessage(`Das Verschieben von "${courseName}" würde die Voraussetzungen für "${dependent}" verletzen.`);
                 return;
             }
         }
@@ -596,7 +605,7 @@ function setErrorMessage(msg) {
   const errorDiv = document.getElementById('error-message');
   if (msg) {
     errorDiv.textContent = msg;
-    errorDiv.style.display = 'block'; // Show the error message div
+    errorDiv.style.display = 'inline-block'; // Show the error message div
   } else {
     errorDiv.style.display = 'none'; // Hide the error message div
   }
@@ -650,9 +659,9 @@ function updateInfo() {
         });
     });
 
-    const totalDifference = totalNeeded - totalCredits;
-    const wahlpflichtDifference = wahlpflichtNeeded - wahlpflichtCredits;
-    const freieWahlDifference = freieWahlNeeded - freieWahlCredits;
+    // const totalDifference = totalNeeded - totalCredits;
+    // const wahlpflichtDifference = wahlpflichtNeeded - wahlpflichtCredits;
+    // const freieWahlDifference = freieWahlNeeded - freieWahlCredits;
 
     // console.log(`Total Credits: ${totalCredits}, Difference: ${totalDifference}`);
     // console.log(`Wahlpflicht: ${wahlpflichtCredits}/${wahlpflichtNeeded}, Difference: ${wahlpflichtDifference}`);
@@ -660,47 +669,65 @@ function updateInfo() {
     // console.log(`Elective before Abschlussmodul: ${foundElectiveBeforeAbschluss}`);
 
     // Create paragraph elements with class based on fulfillment status
-    function createMessage(text, isFulfilled) {
-        const p = document.createElement("p");
-        p.textContent = text;
-        p.classList.add(isFulfilled ? "isFulfilled" : "notFulfilled");
-        return p;
-    }
+    // function createMessage(text, isFulfilled) {
+    //     const p = document.createElement("p");
+    //     p.textContent = text;
+    //     p.classList.add(isFulfilled ? "isFulfilled" : "notFulfilled");
+    //     return p;
+    // }
 
-    infoDiv.appendChild(createMessage(
-        totalCredits === totalNeeded 
-            ? "You have all necessary credits." 
-            : totalCredits < totalNeeded 
-                ? `You have ${totalCredits} credits and need ${Math.abs(totalDifference)} more.` 
-                : `You have ${totalCredits} credits, which is ${Math.abs(totalDifference)} more than required.`,
-        totalCredits >= totalNeeded
-    ));
+    // infoDiv.appendChild(createMessage(
+    //     totalCredits === totalNeeded 
+    //         ? "You have all necessary credits." 
+    //         : totalCredits < totalNeeded 
+    //             ? `You have ${totalCredits} credits and need ${Math.abs(totalDifference)} more.` 
+    //             : `You have ${totalCredits} credits, which is ${Math.abs(totalDifference)} more than required.`,
+    //     totalCredits >= totalNeeded
+    // ));
 
-    infoDiv.appendChild(createMessage(
-        wahlpflichtCredits >= wahlpflichtNeeded 
-            ? "Wahlpflicht requirement fulfilled." 
-            : `You need ${Math.abs(wahlpflichtDifference)} more Wahlpflicht credits.`,
-        wahlpflichtCredits >= wahlpflichtNeeded
-    ));
+    // infoDiv.appendChild(createMessage(
+    //     wahlpflichtCredits >= wahlpflichtNeeded 
+    //         ? "Wahlpflicht requirement fulfilled." 
+    //         : `You need ${Math.abs(wahlpflichtDifference)} more Wahlpflicht credits.`,
+    //     wahlpflichtCredits >= wahlpflichtNeeded
+    // ));
 
-    infoDiv.appendChild(createMessage(
-        freieWahlCredits >= freieWahlNeeded 
-            ? "Freie Wahl requirement fulfilled." 
-            : `You need ${Math.abs(freieWahlDifference)} more Freie Wahl credits.`,
-        freieWahlCredits >= freieWahlNeeded
-    ));
+    // infoDiv.appendChild(createMessage(
+    //     freieWahlCredits >= freieWahlNeeded 
+    //         ? "Freie Wahl requirement fulfilled." 
+    //         : `You need ${Math.abs(freieWahlDifference)} more Freie Wahl credits.`,
+    //     freieWahlCredits >= freieWahlNeeded
+    // ));
 
-    if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
-        infoDiv.appendChild(createMessage(
-            "Warning: You must have at least one Wahlpflicht course before the Abschlussmodul.",
-            false
-        ));
-    }
+    // if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
+    //     infoDiv.appendChild(createMessage(
+    //         "Warning: You must have at least one Wahlpflicht course before the Abschlussmodul.",
+    //         false
+    //     ));
+    // }
+
+    infoDiv.appendChild(createBlock(`Gesamt: ${totalCredits} von ${totalNeeded} LP`, totalCredits >= totalNeeded));
+infoDiv.appendChild(createBlock(`Wahlpflicht: ${wahlpflichtCredits} von ${wahlpflichtNeeded} LP`, wahlpflichtCredits >= wahlpflichtNeeded));
+infoDiv.appendChild(createBlock(`Freie Wahl: ${freieWahlCredits} von ${freieWahlNeeded} LP`, freieWahlCredits >= freieWahlNeeded));
+
+if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
+    infoDiv.appendChild(createBlock( "Du musst mindestens ein Wahlpflichtmodul vor dem Abschlussmodul haben.", false))
+}
 
     infoDiv.style.display = 'block'; // Show the info message div
 }
 
 
+function createBlock(value, istFertig) {
+    const block = document.createElement("div");
+    block.classList.add(istFertig ? "istFertig" : "istNichtFertig");
+    
+    const titleElement = document.createElement("p");
+    titleElement.textContent = value;
+    block.appendChild(titleElement);
+    
+    return block;
+}
 
 
 updateInfo();
@@ -846,7 +873,7 @@ function loadStateFromLocalStorage() {
         courseSquare.style.setProperty('--credits', credits);
         courseSquare.textContent = course.short_name;
         courseSquare.draggable = true;
-        courseSquare.id = `course-${course.id}`; // Unique ID for each course
+        courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
         courseSquare.style.backgroundColor = course.color;
 
         courseSquare.dataset.short_name = course.short_name;
@@ -874,6 +901,12 @@ function loadStateFromLocalStorage() {
 
 //clear 
 function clearPlanner() {
+    const isConfirmed = window.confirm("Bist du sicher, dass du den Planer zurücksetzen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.");
+
+    if (!isConfirmed) {
+        return; // If not confirmed, do nothing
+    }
+
     // Clear localStorage
     localStorage.removeItem('coursePlannerState');
 
@@ -904,7 +937,7 @@ function clearPlanner() {
             courseSquare.style.setProperty('--credits', credits);
             courseSquare.textContent = course.short_name;
             courseSquare.draggable = true;
-            courseSquare.id = `course-${course.id}`; // Unique ID for each course
+            courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
             courseSquare.style.backgroundColor = course.color;
 
             courseSquare.dataset.short_name = course.short_name;
@@ -942,7 +975,7 @@ function clearPlanner() {
         courseSquare.style.setProperty('--credits', credits);
         courseSquare.textContent = course.short_name;
         courseSquare.draggable = true;
-        courseSquare.id = `course-${course.id}`; // Unique ID for each course
+        courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
         courseSquare.style.backgroundColor = course.color;
 
         courseSquare.dataset.short_name = course.short_name;

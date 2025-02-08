@@ -40,7 +40,9 @@ button:hover {
     margin-right: 10px;
 }
 
-
+.button-spacing {
+    margin-right: 10px; /* Adjust the value as needed */
+}
 
 .grid {
     display: flex;
@@ -84,25 +86,36 @@ button:hover {
     width: calc(50px * var(--credits) + 5px * (var(--credits) / 3 - 0.166));
 }
 
-#info-message, #error-message {
-    padding: 10px;
+
+.istFertig, .istNichtFertig {
+    display: inline-block;
+    margin-right: 5px;
     border-radius: 5px;
-    margin-top: 20px;
-    display: none;
+    padding: 5px;
+    border: 2px solid gray; /* Gray border for both */
 }
 
-.isFulfilled {
+.istFertig {
     background-color: #d4edda;
     color: #155724;
-}
-.notFulfilled {
-    background-color: #f0f0f0;
-    color: black;
+    border-color: green; /* Green border for finished state */
 }
 
+.istNichtFertig {
+    background-color: #e2e3e5;
+    color: black;
+    border-color: gray; /* Always gray border */
+}
+
+
 #error-message {
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
     background-color: #f8d7da;
     color: #721c24;
+    border-color: #721c24;
 }
 
 .overlay {

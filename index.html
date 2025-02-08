@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris</title>
+    <title>Module-Tetris</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Course Planner</h1>
-    <button id="clear-button">Clear Planner</button>
+    <h1>Module-Tetris</h1>
+    <button id="clear-button">Zurücksetzen</button>
+    <div id="info-message"></div>
+    <div id="error-message" ></div>
+
 
     <div id="freie-wahl" class="electives-container "></div>
     <div id="freie-wahl-container">
         <input type="text" id="freie-wahl-name" placeholder="Name des Kurses">
-        <input type="number" id="freie-wahl-credits" placeholder="Credits" min="1" step="1" max="30">
-        <button id="add-freie-wahl">Add Course</button>
+        <input type="number" id="freie-wahl-credits" placeholder="LP" min="1" step="1" max="30">
+        <button id="add-freie-wahl">Kurs hinzufügen</button>
         <div id="freie-wahl"></div>
     </div>
 
-    <div id="button-container">
-        <button data-filter="all">Alle Module</button>
-        <button data-filter="summer">Sommer Module</button>
-        <button data-filter="winter">Winter Module</button>
-    </div>
+    <label for="module-filter">Filter:</label>
+    <select id="module-filter">
+        <option value="all">Alle Module</option>
+        <option value="summer">Sommer Module</option>
+        <option value="winter">Winter Module</option>
+    </select>
 
     <div id="electives" class="electives-container "></div>
     <div id="semesters" class="semester-container"></div>
-    <div id="info-message"></div>
-    <div id="error-message" ></div>
+
     <!-- The Overlay -->
     <div id="overlay" class="overlay">
         <div class="overlay-content">
@@ -37,6 +40,8 @@
             <button id="closeOverlay">Close</button>
         </div>
     </div>
+
+    
 
 <script type="module" src="main.js"></script>
 </body>
