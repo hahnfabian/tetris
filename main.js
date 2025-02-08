@@ -904,7 +904,6 @@ function loadStateFromLocalStorage() {
 //clear 
 function clearPlanner() {
     const isConfirmed = window.confirm("Bist du sicher, dass du den Planer zurücksetzen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.");
-
     if (!isConfirmed) {
         return; // If not confirmed, do nothing
     }
@@ -963,6 +962,7 @@ function clearPlanner() {
 
         semestersContainer.appendChild(semesterDiv);
         updateInfo();
+        clearErrorMessage();
     }
 
     // Reset electives

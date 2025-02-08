@@ -10,10 +10,12 @@
 </head>
 <body>
     <h1>Module-Tetris</h1>
-    <p>Mit Drag & Drop kannst du Module bewegen und dein Modul-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>    <button id="clear-button">Zurücksetzen</button>
+    <p>Mit Drag & Drop kannst du Module bewegen und dein Module-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>    <button id="clear-button">Zurücksetzen</button>
     <div id="info-message"></div>
     <div id="error-message"></div>
 
+    <h2>Freie Wahl</h2>
+    <p></p>
     <div id="freie-wahl" class="electives-container"></div>
     <div id="freie-wahl-container">
         <input type="text" id="freie-wahl-name" placeholder="Name des Kurses">
@@ -21,8 +23,9 @@
         <button id="add-freie-wahl">Kurs hinzufügen</button>
         <div id="freie-wahl"></div>
     </div>
-
-    <label for="module-filter">Filter:</label>
+    
+    <h2>Wahlpflicht</h2>
+    <p>Du kannst nach WiSe und SoSe filtern. Wenn du auf ein Modul klickst, kannst du es zu Freier Wahl machen.</p>
     <select id="module-filter">
         <option value="all">Alle Module</option>
         <option value="summer">Sommer Module</option>
@@ -30,6 +33,8 @@
     </select>
 
     <div id="electives" class="electives-container"></div>
+    
+    <h2>Dein Tetris</h2>
     <div id="semesters" class="semester-container"></div>
 
     <!-- The Overlay -->
