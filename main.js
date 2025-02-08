@@ -125,7 +125,7 @@ const addFreieWahlButton = document.getElementById('add-freie-wahl');
 function addFreieWahlClass(name, credits) {
     clearErrorMessage();
     if (!name || credits <= 0 || isNaN(credits)) {
-        setErrorMessage("Freie Wahl Module brauchen einen Namen und eine Credit anzahl.");
+        setErrorMessage("Freie Wahl Module brauchen einen Namen und eine Credit Anzahl.");
         return;
     }
 
@@ -469,7 +469,7 @@ function drop(event) {
         (!isWinterSemester && courseSemesterType === "winter")    // Summer semester but course is for winter
     ) {
         // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
-        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Falscher Semestertyp.`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht ins ${isWinterSemester ? "Wintersemester" : "Sommersemester"} verschoben werden, da es für das ${courseSemesterType === "winter" ? "Wintersemester" : "Sommersemester"} vorgesehen ist.`);
         return;
     }
 
