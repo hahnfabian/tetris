@@ -1,16 +1,16 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 1.25rem;
 }
 
 button {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.3125rem;
     cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
 }
 
 button:hover {
@@ -18,100 +18,101 @@ button:hover {
 }
 
 .electives-container {
-    width: 1000px;
+    width: 100%;
+    max-width: 62.5rem; /* 1000px converted to rem */
     display: flex;
-    flex-wrap: wrap; 
-    gap: 5px; 
+    flex-wrap: wrap;
+    gap: 0.3125rem;
     background-color: #f0f0f0;
-    padding: 5px;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    min-height: 50px;
+    padding: 0.3125rem;
+    margin: 0.625rem 0;
+    min-height: 3.125rem;
 }
 .electives-container.highlight {
-    outline: 2px dashed #007bff;
+    outline: 0.125rem dashed #007bff;
 }
 
 .semester {
-    margin-bottom: 20px;
+    margin-bottom: 0.3125rem;
     display: flex;
 }
 .semester p {
-    margin-right: 10px;
+    margin-right: 0.625rem;
 }
 
 .button-spacing {
-    margin-right: 10px; /* Adjust the value as needed */
+    margin-right: 0.625rem;
 }
 
 .grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 0.3125rem;
     background-color: #f0f0f0;
-    padding: 5px;
-    border-radius: 5px;
+    padding: 0.3125rem;
+    border-radius: 0.3125rem;
     width: max-content;
-    min-width: 545px;
-    height: 50px;
+    min-width: 34.0625rem; /* 545px converted */
+    height: 3.125rem;
 }
 .grid.highlight {
-    outline: 2px dashed #007bff;
-}
-
-.square {
-    width: 50px;
-    height: 50px;
-    background-color: #e0e0e0;
-    border: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-
-.square:hover {
-    transform: scale(1.025);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    outline: 0.125rem dashed #007bff;
 }
 
 .course {
+    width: 3.125rem;
+    height: 3.125rem;
+    background-color: #e0e0e0;
+    border: 0.0625rem solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
     color: black;
     cursor: grab;
+    width: calc(3.125rem * var(--credits) + 0.3125rem * (var(--credits) / 3 - 0.166));
 }
+
+.course:hover {
+    transform: scale(1.025);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+}
+
 .course:active {
     cursor: grabbing;
-}
-.course-joined {
-    width: calc(50px * var(--credits) + 5px * (var(--credits) / 3 - 0.166));
 }
 
 
 .istFertig, .istNichtFertig {
+    font-size: 1rem;
     display: inline-block;
-    margin-right: 5px;
-    border-radius: 5px;
-    padding: 5px;
-    border: 2px solid gray; /* Gray border for both */
+    margin-right: 0.3125rem;
+    border-radius: 0.3125rem;
+    padding: 0.3125rem;
+    border: 0.125rem solid gray;
+    margin-bottom: 0.625rem;
+}
+
+.istFertig p, .istNichtFertig p {
+    margin: 0;
 }
 
 .istFertig {
     background-color: #d4edda;
     color: #155724;
-    border-color: green; /* Green border for finished state */
+    border-color: green;
 }
 
 .istNichtFertig {
-    background-color: #e2e3e5;
-    color: black;
-    border-color: gray; /* Always gray border */
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #721c24;
 }
 
-
 #error-message {
-    margin-top: 5px;
-    padding: 10px;
-    border-radius: 5px;
+    margin-bottom: 0.625rem;
+    padding: 0.625rem;
+    border-radius: 0.3125rem;
     display: none;
     background-color: #f8d7da;
     color: #721c24;
@@ -125,7 +126,7 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -135,13 +136,12 @@ button:hover {
 /* Styling for the content inside the overlay */
 .overlay-content {
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 700px;
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    width: 43.75rem;
     margin: auto;
 }
 
 .isMarkedAsFreieWahl {
     background-color: #ffcc82 !important;
 }
-

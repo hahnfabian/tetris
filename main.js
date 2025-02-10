@@ -1,30 +1,91 @@
+//ERROR: drag over das highlight und so wird nicht entfernt und doppelte alerts
 import {courses} from './data/courses.js';
-
-
 
 const overlay = document.getElementById('overlay');
 const closeOverlayButton = document.getElementById('closeOverlay');
+const freieWahlContainer = document.getElementById('freie-wahl');
+const freieWahlNameInput = document.getElementById('freie-wahl-name');
+const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
+const addFreieWahlButton = document.getElementById('add-freie-wahl');
+const semestersContainer = document.getElementById('semesters');
+const electivesContainer = document.getElementById('electives');
+const moduleFilter = document.getElementById('module-filter');
+const clearButton = document.getElementById('clear-button');
+const electivesCourses = courses.filter(course => course.elective === true);
 
-// Show the overlay when the open button is clicked
 
-// Hide the overlay when the close button is clicked
-closeOverlayButton.addEventListener('click', () => {
-    overlay.style.display = 'none';
+let draggedCourse = null;
+
+const courseDependencies = {};
+courses.forEach(course => {
+    course.prerequisites.forEach(prerequisite => {
+        if (!courseDependencies[prerequisite]) {
+            courseDependencies[prerequisite] = [];
+        }
+        courseDependencies[prerequisite].push(course.short_name);
+    });
 });
 
-// Close the overlay when clicking outside of the content area
+clearButton.addEventListener('click', clearPlanner);
+moduleFilter.addEventListener('change', (event) => renderElectives(event.target.value));
+
+// Hide the overlay 
+closeOverlayButton.addEventListener('click', () => { overlay.style.display = 'none'; });
 overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
         overlay.style.display = 'none';
     }
 });
-
-// Close the overlay when the Escape key is pressed
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         overlay.style.display = 'none';
     }
 });
+
+// Function to create a course square
+function createCourseSquare(course, isElective = false, isFreieWahl = false) {
+    const courseSquare = document.createElement('div');
+    courseSquare.className = 'course';
+    courseSquare.style.setProperty('--credits', course.credits / 3);
+    courseSquare.textContent = course.short_name;
+    courseSquare.draggable = true;
+    courseSquare.id = `course-${course.short_name}`;
+    courseSquare.style.backgroundColor = course.color;
+
+    Object.entries({
+        short_name: course.short_name,
+        name: course.name,
+        credits: course.credits,
+        credits_needed: course.credits_needed,
+        semester: course.semester,
+        intendedSemester: course.intended_semester,
+        prerequisites: JSON.stringify(course.prerequisites),
+        isElective: isElective,
+        isFreieWahl: isFreieWahl,
+        recommended_prerequisites: JSON.stringify(course.recommended_prerequisites),
+    }).forEach(([key, value]) => courseSquare.dataset[key] = value);
+
+    attachEventListenersToCourse(courseSquare);
+    return courseSquare;
+}
+
+function attachEventListenersToCourse(courseSquare) {
+    courseSquare.addEventListener('dragstart', dragStart);
+    courseSquare.addEventListener('dragover', dragOver);
+    courseSquare.addEventListener('drop', drop);
+    courseSquare.addEventListener('click', () => showCourseDetails(courseSquare));
+}
+
+function attachEventListenersToGrid(grid) {
+    grid.addEventListener('dragleave', () => grid.classList.remove('highlight'));
+    grid.addEventListener('dragover', dragOver);
+    grid.addEventListener('drop', drop);
+    grid.addEventListener('dragend', restoreOpacity);
+}
+
+
+
+
 
 // This function will populate the overlay with the course's details
 function showCourseDetails(course) {
@@ -50,6 +111,12 @@ function showCourseDetails(course) {
     const prerequisites = JSON.parse(course.dataset.prerequisites);
     coursePrerequisites.textContent = `Voraussetzungen: ${prerequisites.length > 0 ? prerequisites.join(', ') : 'Keine'}`;  // Prerequisites
     overlayContent.appendChild(coursePrerequisites);
+
+    const courseRecommendedPrerequisites = document.createElement('p');
+    console.log(course.dataset.recommended_prerequisites)
+    const recommendedPrerequisites = JSON.parse(course.dataset.recommended_prerequisites || "[]")
+    courseRecommendedPrerequisites.textContent = `Vorwissen empfohlen: ${recommendedPrerequisites.length > 0 ? recommendedPrerequisites.join(', ') : 'Nein'}`;  // Prerequisites
+    overlayContent.appendChild(courseRecommendedPrerequisites);
 
     const creditsPrerequisites = document.createElement('p');
     const creditsNeededOverlay = course.dataset.credits_needed; 
@@ -117,10 +184,7 @@ function deleteCourse(course) {
 
 
 
-const freieWahlContainer = document.getElementById('freie-wahl');
-const freieWahlNameInput = document.getElementById('freie-wahl-name');
-const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
-const addFreieWahlButton = document.getElementById('add-freie-wahl');
+
 
 function addFreieWahlClass(name, credits) {
     clearErrorMessage();
@@ -129,45 +193,25 @@ function addFreieWahlClass(name, credits) {
         return;
     }
 
-    const courseSquare = document.createElement('div');
-    courseSquare.className = 'square course course-joined';
-    courseSquare.style.setProperty('--credits', credits/3); 
-    courseSquare.textContent = `${name} (${credits} LP)`;
-    courseSquare.draggable = true;
-    courseSquare.id = `course-freiewahl-${Math.random().toString(36).substr(2, 9)}`;
-    courseSquare.style.backgroundColor = '#ffcc82';
-
-    // Store data attributes
-    Object.entries({
+    const courseSquare = createCourseSquare({
         short_name: name,
         name: name,
         credits: credits,
         credits_needed: 0,
         semester: 'both',
-        intendedSemester: null,
-        prerequisites: "[]",
-        isElective: false,
-        isFreieWahl: true
-    }).forEach(([key, value]) => courseSquare.dataset[key] = value);
-
-    // Drag and Drop event listeners
-    courseSquare.addEventListener('dragstart', dragStart);
-    courseSquare.addEventListener('dragover', dragOver);
-    courseSquare.addEventListener('drop', drop);
-
-    courseSquare.addEventListener('click', (event) => {
-        event.stopPropagation();
-        showCourseDetails(courseSquare);
-    });
-
-
+        intended_semester: null,
+        prerequisites: [],
+        recommended_prerequisites: [],
+        color: '#ffcc82',
+    }, false, true);
 
     freieWahlContainer.appendChild(courseSquare);
-
-    // Clear input fields after adding
     freieWahlNameInput.value = "";
     freieWahlCreditsInput.value = "";
+
+    saveStateToLocalStorage();
 }
+
 
 // Event listener for adding new courses
 addFreieWahlButton.addEventListener('click', () => {
@@ -176,134 +220,73 @@ addFreieWahlButton.addEventListener('click', () => {
     addFreieWahlClass(name, credits);
 });
 
-// Drag and Drop event listeners for container
-freieWahlContainer.addEventListener('dragover', dragOver);
-freieWahlContainer.addEventListener('drop', drop);
-freieWahlContainer.addEventListener('dragleave', () => freieWahlContainer.classList.remove('highlight'));
+// // Drag and Drop event listeners for container
+// freieWahlContainer.addEventListener('dragover', dragOver);
+// freieWahlContainer.addEventListener('drop', drop);
+// freieWahlContainer.addEventListener('dragleave', () => freieWahlContainer.classList.remove('highlight'));
 
+attachEventListenersToGrid(freieWahlContainer);
 
-// Freie Wahl #ffcc82
-const freieWahlContainer2 = document.getElementById('freie-wahl');
+// die 3 basic Freie Wahl kurse #ffcc82
 for (let freieWahlGröße = 1; freieWahlGröße <= 3; freieWahlGröße++) {
-    const courseSquare = document.createElement('div');
-    courseSquare.className = 'square course course-joined';
-    courseSquare.style.setProperty('--credits', freieWahlGröße); 
-    courseSquare.textContent = `${freieWahlGröße*3} LP`;
-    courseSquare.draggable = true;
-    courseSquare.id = `course-freiewahl-${Math.random().toString(36).substr(2, 9)}`;
-    courseSquare.style.backgroundColor = '#ffcc82'
+    const courseSquare = createCourseSquare({
+        short_name:  `${freieWahlGröße*3} LP`,
+        name:  `Freie Wahl Beispiel ${freieWahlGröße*3} LP`,
+        credits: freieWahlGröße*3,
+        credits_needed: 0,
+        semester: 'both',
+        intended_semester: null,
+        prerequisites: [],
+        recommended_prerequisites: [],
+        color: '#ffcc82',
+    }, false, true);
 
-    courseSquare.dataset.short_name = `${freieWahlGröße*3} LP`;
-    courseSquare.dataset.name = `Freie Wahl ${freieWahlGröße*3} LP`;
-    courseSquare.dataset.credits = freieWahlGröße*3;
-    courseSquare.dataset.credits_needed = 0;
-    courseSquare.dataset.semester = 'both';
-    courseSquare.dataset.intendedSemester = null;
-    courseSquare.dataset.prerequisites = "[]";
-    courseSquare.dataset.isElective = false;
-    courseSquare.dataset.isFreieWahl = true;
-
-
-    // Drag and Drop event listeners
-    courseSquare.addEventListener('dragstart', dragStart);
-    courseSquare.addEventListener('dragover', dragOver);
-    courseSquare.addEventListener('drop', drop);
-
-    courseSquare.addEventListener('click', () => {
-        showCourseDetails(courseSquare);
-    });
-
-    freieWahlContainer2.appendChild(courseSquare);
+    freieWahlContainer.appendChild(courseSquare);
 }
-freieWahlContainer2.addEventListener('dragover', dragOver);
-freieWahlContainer2.addEventListener('drop', drop);
-freieWahlContainer2.addEventListener('dragleave', () => freieWahlContainer2.classList.remove('highlight'));
 
+function createStarterSemester() {
+    // Create a grid for each semester (1 to 6)
+    for (let semester = 1; semester <= 7; semester++) {
+        const semesterDiv = document.createElement('div');
+        semesterDiv.className = 'semester';
 
+        semesterDiv.dataset.number = semester;
 
+        const semesterTitle = document.createElement('p');
+        semesterTitle.textContent = `${semester}. FS`;
+        semesterDiv.appendChild(semesterTitle);
 
-const semestersContainer = document.getElementById('semesters');
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
 
-// Create a mapping of each course to the courses that depend on it
-const courseDependencies = {};
-courses.forEach(course => {
-    course.prerequisites.forEach(prerequisite => {
-        if (!courseDependencies[prerequisite]) {
-            courseDependencies[prerequisite] = [];
-        }
-        courseDependencies[prerequisite].push(course.short_name);
-    });
-});
+        // Add courses to the grid
+        const semesterCourses = courses.filter(course => course.intended_semester === semester);
+        semesterCourses.forEach(course => {
+            const courseSquare =  createCourseSquare(course, false, false);
 
-// Create a grid for each semester (1 to 6)
-for (let semester = 1; semester <= 7; semester++) {
-    const semesterDiv = document.createElement('div');
-    semesterDiv.className = 'semester';
-
-    semesterDiv.dataset.number = semester;
-
-    const semesterTitle = document.createElement('p');
-    semesterTitle.textContent = `${semester}. FS`;
-    semesterDiv.appendChild(semesterTitle);
-
-    const gridDiv = document.createElement('div');
-    gridDiv.className = 'grid';
-
-    // Add courses to the grid
-    const semesterCourses = courses.filter(course => course.intended_semester === semester);
-    semesterCourses.forEach(course => {
-        const credits = course.credits / 3; // Each square represents 3 credits
-        const courseSquare = document.createElement('div');
-        courseSquare.className = 'square course course-joined';
-        courseSquare.style.setProperty('--credits', credits);
-        courseSquare.textContent = course.short_name;
-        courseSquare.draggable = true;
-        courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
-        courseSquare.style.backgroundColor = course.color;
-
-        courseSquare.dataset.short_name = course.short_name;
-        courseSquare.dataset.name = course.name;
-        courseSquare.dataset.credits = course.credits;
-        courseSquare.dataset.credits_needed = course.credits_needed;
-        courseSquare.dataset.semester = course.semester;
-        courseSquare.dataset.intendedSemester = course.intended_semester;
-        courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
-        courseSquare.dataset.isElective = course.elective;
-        courseSquare.dataset.isFreieWahl = false;
-
-
-        // Drag and Drop event listeners
-        courseSquare.addEventListener('dragstart', dragStart);
-        courseSquare.addEventListener('dragover', dragOver);
-        courseSquare.addEventListener('drop', drop);
-
-        // Add click event listener to open overlay with course details
-        courseSquare.addEventListener('click', () => {
-            showCourseDetails(courseSquare);
+            gridDiv.appendChild(courseSquare);
         });
 
-        gridDiv.appendChild(courseSquare);
-    });
+        semesterDiv.appendChild(gridDiv);
+        semestersContainer.appendChild(semesterDiv);
+    }
 
-    semesterDiv.appendChild(gridDiv);
-    semestersContainer.appendChild(semesterDiv);
 }
+    
 
-
-function getPlacedCourses() {
-    const placedCourses = new Set();
-    document.querySelectorAll('.semester .course').forEach(course => {
-        placedCourses.add(course.dataset.short_name);
-    });
-    return placedCourses;
-}
 
 // Space for electives
-const electivesDiv = document.getElementById('electives');
-const electivesCourses = courses.filter(course => course.elective === true);
 
 function renderElectives(filter = 'all') {
-    electivesDiv.innerHTML = ''; // Clear existing electives
+    function getPlacedCourses() {
+        const placedCourses = new Set();
+        document.querySelectorAll('.semester .course').forEach(course => {
+            placedCourses.add(course.dataset.short_name);
+        });
+        return placedCourses;
+    }
+    
+    electivesContainer.innerHTML = ''; // Clear existing electives
     const placedCourses = getPlacedCourses(); // Get currently placed courses
 
     electivesCourses.forEach(course => {
@@ -314,48 +297,15 @@ function renderElectives(filter = 'all') {
             !placedCourses.has(course.short_name) && // Only add if not placed in a semester
             (filter === 'all' || (filter === 'summer' && isSummer) || (filter === 'winter' && isWinter))
         ) {
-            const credits = course.credits / 3;
-            const courseSquare = document.createElement('div');
-            courseSquare.className = 'square course course-joined';
-            courseSquare.style.setProperty('--credits', credits);
-            courseSquare.textContent = course.short_name;
-            courseSquare.draggable = true;
-            courseSquare.id = `course-${course.short_name}`;
-            courseSquare.style.backgroundColor = course.color;
+            const courseSquare = createCourseSquare(course, true, false);
 
-            // Store course data as dataset attributes
-            Object.entries({
-                short_name: course.short_name,
-                name: course.name,
-                credits: course.credits,
-                credits_needed: course.credits_needed,
-                semester: course.semester,
-                intendedSemester: course.intended_semester,
-                prerequisites: JSON.stringify(course.prerequisites),
-                isElective: course.elective
-            }).forEach(([key, value]) => courseSquare.dataset[key] = value);
-
-            // Drag and Drop event listeners
-            courseSquare.addEventListener('dragstart', dragStart);
-            courseSquare.addEventListener('dragover', dragOver);
-            courseSquare.addEventListener('drop', drop);
-
-            courseSquare.addEventListener('click', () => {
-                showCourseDetails(courseSquare);
-            });
-
-            electivesDiv.appendChild(courseSquare);
+            electivesContainer.appendChild(courseSquare);
         }
     });
 }
-document.getElementById('module-filter').addEventListener('change', (event) => {
-    renderElectives(event.target.value);
-});
-renderElectives();
 
-electivesDiv.addEventListener('dragover', dragOver);
-electivesDiv.addEventListener('drop', drop);
-electivesDiv.addEventListener('dragleave', () => electivesDiv.classList.remove('highlight'));
+
+
 
 
 
@@ -366,8 +316,6 @@ document.querySelectorAll('.grid').forEach(grid => {
     grid.addEventListener('drop', drop);
     document.addEventListener('dragend', restoreOpacity);
 });
-
-let draggedCourse = null;
 
 function dragStart(event) {
     draggedCourse = event.target;
@@ -431,7 +379,6 @@ function drop(event) {
         draggedCourse = null;
         clearErrorMessage();
         updateInfo();
-
         saveStateToLocalStorage();
         return;
     }
@@ -450,8 +397,6 @@ function drop(event) {
         draggedCourse = null;
         clearErrorMessage();
         updateInfo();
-
-        // Save the state to localStorage
         saveStateToLocalStorage();
         return;
     }
@@ -575,8 +520,8 @@ function drop(event) {
 
     // Check and clean up empty semesters
     cleanupEmptySemesters();
-    saveStateToLocalStorage();
     updateInfo();
+    saveStateToLocalStorage();
 }
 
 
@@ -615,7 +560,7 @@ function setErrorMessage(msg) {
 
 
 function clearErrorMessage() {
-  setErrorMessage(''); // Clears the message by passing an empty string
+    setErrorMessage(''); // Clears the message by passing an empty string
 }
 
 
@@ -661,62 +606,14 @@ function updateInfo() {
         });
     });
 
-    // const totalDifference = totalNeeded - totalCredits;
-    // const wahlpflichtDifference = wahlpflichtNeeded - wahlpflichtCredits;
-    // const freieWahlDifference = freieWahlNeeded - freieWahlCredits;
-
-    // console.log(`Total Credits: ${totalCredits}, Difference: ${totalDifference}`);
-    // console.log(`Wahlpflicht: ${wahlpflichtCredits}/${wahlpflichtNeeded}, Difference: ${wahlpflichtDifference}`);
-    // console.log(`Freie Wahl: ${freieWahlCredits}/${freieWahlNeeded}, Difference: ${freieWahlDifference}`);
-    // console.log(`Elective before Abschlussmodul: ${foundElectiveBeforeAbschluss}`);
-
-    // Create paragraph elements with class based on fulfillment status
-    // function createMessage(text, isFulfilled) {
-    //     const p = document.createElement("p");
-    //     p.textContent = text;
-    //     p.classList.add(isFulfilled ? "isFulfilled" : "notFulfilled");
-    //     return p;
-    // }
-
-    // infoDiv.appendChild(createMessage(
-    //     totalCredits === totalNeeded 
-    //         ? "You have all necessary credits." 
-    //         : totalCredits < totalNeeded 
-    //             ? `You have ${totalCredits} credits and need ${Math.abs(totalDifference)} more.` 
-    //             : `You have ${totalCredits} credits, which is ${Math.abs(totalDifference)} more than required.`,
-    //     totalCredits >= totalNeeded
-    // ));
-
-    // infoDiv.appendChild(createMessage(
-    //     wahlpflichtCredits >= wahlpflichtNeeded 
-    //         ? "Wahlpflicht requirement fulfilled." 
-    //         : `You need ${Math.abs(wahlpflichtDifference)} more Wahlpflicht credits.`,
-    //     wahlpflichtCredits >= wahlpflichtNeeded
-    // ));
-
-    // infoDiv.appendChild(createMessage(
-    //     freieWahlCredits >= freieWahlNeeded 
-    //         ? "Freie Wahl requirement fulfilled." 
-    //         : `You need ${Math.abs(freieWahlDifference)} more Freie Wahl credits.`,
-    //     freieWahlCredits >= freieWahlNeeded
-    // ));
-
-    // if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
-    //     infoDiv.appendChild(createMessage(
-    //         "Warning: You must have at least one Wahlpflicht course before the Abschlussmodul.",
-    //         false
-    //     ));
-    // }
-
     infoDiv.appendChild(createBlock(`Gesamt: ${totalCredits} von ${totalNeeded} LP`, totalCredits >= totalNeeded));
-infoDiv.appendChild(createBlock(`Wahlpflicht: ${wahlpflichtCredits} von ${wahlpflichtNeeded} LP`, wahlpflichtCredits >= wahlpflichtNeeded));
-infoDiv.appendChild(createBlock(`Freie Wahl: ${freieWahlCredits} von ${freieWahlNeeded} LP`, freieWahlCredits >= freieWahlNeeded));
+    infoDiv.appendChild(createBlock(`Wahlpflicht: ${wahlpflichtCredits} von ${wahlpflichtNeeded} LP`, wahlpflichtCredits >= wahlpflichtNeeded));
+    infoDiv.appendChild(createBlock(`Freie Wahl: ${freieWahlCredits} von ${freieWahlNeeded} LP`, freieWahlCredits >= freieWahlNeeded));
 
-if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
-    infoDiv.appendChild(createBlock( "Du musst mindestens ein Wahlpflichtmodul vor dem Abschlussmodul haben.", false))
-}
-
-    infoDiv.style.display = 'block'; // Show the info message div
+    if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
+        infoDiv.appendChild(createBlock( "Du musst mindestens ein Wahlpflichtmodul vor dem Abschlussmodul haben.", false))
+    }
+        infoDiv.style.display = 'block'; // Show the info message div
 }
 
 
@@ -735,172 +632,6 @@ function createBlock(value, istFertig) {
 updateInfo();
 
 
-//local storage
-// function saveStateToLocalStorage() {
-//     const semesters = Array.from(document.querySelectorAll('.semester'));
-//     const state = semesters.map(semester => {
-//         const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
-//             console.log(course.id + " " + course.classList.value)
-//             return {
-//                 id: course.id,
-//                 short_name: course.dataset.short_name,
-//                 name: course.dataset.name,
-//                 credits: course.dataset.credits,
-//                 credits_needed: course.dataset.credits_needed,
-//                 semester: course.dataset.semester,
-//                 intendedSemester: course.dataset.intendedSemester,
-//                 prerequisites: JSON.parse(course.dataset.prerequisites),
-//                 isElective: course.dataset.isElective,
-//                 color: course.style.backgroundColor,
-//                 isFreieWahl: course.dataset.isFreieWahl,
-//                 classnames: course.classList.value
-//             };
-//         });
-//         return {
-//             number: semester.dataset.number,
-//             courses: courses
-//         };
-//     });
-
-//     // Save the state to localStorage
-//     localStorage.setItem('coursePlannerState', JSON.stringify(state));
-// }
-let saveTimeout;
-function saveStateToLocalStorage() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-        const semesters = Array.from(document.querySelectorAll('.semester'));
-        const state = semesters.map(semester => {
-            const courses = Array.from(semester.querySelectorAll('.course')).map(course => {
-                // console.log("Saving:", course.id, course.classList.value);
-                return {
-                    id: course.id,
-                    short_name: course.dataset.short_name,
-                    name: course.dataset.name,
-                    credits: course.dataset.credits,
-                    credits_needed: course.dataset.credits_needed,
-                    semester: course.dataset.semester,
-                    intendedSemester: course.dataset.intendedSemester,
-                    prerequisites: JSON.parse(course.dataset.prerequisites || "[]"),
-                    isElective: course.dataset.isElective === "true",
-                    color: course.style.backgroundColor,
-                    isFreieWahl: course.dataset.isFreieWahl === "true",
-                    classnames: course.classList.value
-                };
-            });
-            return {
-                number: semester.dataset.number,
-                courses: courses
-            };
-        });
-
-        localStorage.setItem('coursePlannerState', JSON.stringify(state));
-        // console.log("State saved:", state);
-    }, 200); // Adjust delay if needed
-}
-
-
-
-function loadStateFromLocalStorage() {
-    const state = localStorage.getItem('coursePlannerState');
-    if (!state) return; // No saved state found
-
-    const semestersData = JSON.parse(state);
-
-    // Clear existing semesters
-    const semestersContainer = document.getElementById('semesters');
-    semestersContainer.innerHTML = '';
-
-    // Track which electives are already placed in semesters
-    const placedElectives = new Set();
-
-    // Recreate semesters and courses from the saved state
-    semestersData.forEach(semesterData => {
-        const semesterDiv = document.createElement('div');
-        semesterDiv.className = 'semester';
-        semesterDiv.dataset.number = semesterData.number;
-
-        const semesterTitle = document.createElement('p');
-        semesterTitle.textContent = `${semesterData.number}. FS`;
-        semesterDiv.appendChild(semesterTitle);
-
-        const gridDiv = document.createElement('div');
-        gridDiv.className = 'grid';
-        semesterDiv.appendChild(gridDiv);
-
-        // Add courses to the grid
-        semesterData.courses.forEach(courseData => {
-            const courseSquare = document.createElement('div');
-            courseSquare.className = courseData.classnames;
-            courseSquare.style.setProperty('--credits', courseData.credits / 3);
-            courseSquare.textContent = courseData.short_name;
-            courseSquare.draggable = true;
-            courseSquare.id = courseData.id;
-            courseSquare.style.backgroundColor = courseData.color;
-
-            courseSquare.dataset.short_name = courseData.short_name;
-            courseSquare.dataset.name = courseData.name;
-            courseSquare.dataset.credits = courseData.credits;
-            courseSquare.dataset.credits_needed = courseData.credits_needed;
-            courseSquare.dataset.semester = courseData.semester;
-            courseSquare.dataset.intendedSemester = courseData.intendedSemester;
-            courseSquare.dataset.prerequisites = JSON.stringify(courseData.prerequisites);
-            courseSquare.dataset.isElective = courseData.isElective;
-            courseSquare.dataset.isFreieWahl = courseData.isFreieWahl;
-
-            // Drag and Drop event listeners
-            attachEventListenersToCourse(courseSquare);
-
-            gridDiv.appendChild(courseSquare);
-
-            // Track electives placed in semesters
-            if (courseData.isElective === true || courseData.isElective === 'true') { //TODO: das wo es manchmal nur bool ist ist fucked
-                placedElectives.add(courseData.short_name);
-            }
-        });
-
-        semestersContainer.appendChild(semesterDiv);
-        updateInfo();
-    });
-
-    // Reset electives pool, excluding placed electives
-    const electivesDiv = document.getElementById('electives');
-    electivesDiv.innerHTML = ''; // Clear all electives
-
-    const electivesCourses = courses.filter(course => course.elective === true && !placedElectives.has(course.short_name));
-    electivesCourses.forEach(course => {
-        const credits = course.credits / 3; // Each square represents 3 credits
-        const courseSquare = document.createElement('div');
-        courseSquare.className = 'square course course-joined';
-        courseSquare.style.setProperty('--credits', credits);
-        courseSquare.textContent = course.short_name;
-        courseSquare.draggable = true;
-        courseSquare.id = `course-${course.short_name}`; // Unique ID for each course
-        courseSquare.style.backgroundColor = course.color;
-
-        courseSquare.dataset.short_name = course.short_name;
-        courseSquare.dataset.name = course.name;
-        courseSquare.dataset.credits = course.credits;
-        courseSquare.dataset.credits_needed = course.credits_needed;
-        courseSquare.dataset.semester = course.semester;
-        courseSquare.dataset.intendedSemester = course.intended_semester;
-        courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
-        courseSquare.dataset.isElective = course.elective;
-        courseSquare.dataset.isFreieWahl = false;
-
-        // Drag and Drop event listeners
-        attachEventListenersToCourse(courseSquare);
-
-        electivesDiv.appendChild(courseSquare);
-    });
-
-    // Add event listeners to the new grids
-    document.querySelectorAll('.grid').forEach(grid => {
-        attachEventListenersToGrid(grid);
-    });
-}
-
-
 //clear 
 function clearPlanner() {
     const isConfirmed = window.confirm("Bist du sicher, dass du den Planer zurücksetzen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.");
@@ -908,7 +639,6 @@ function clearPlanner() {
         return; // If not confirmed, do nothing
     }
 
-    // Clear localStorage
     localStorage.removeItem('coursePlannerState');
 
     // Reset the UI to its initial state
@@ -934,7 +664,7 @@ function clearPlanner() {
         semesterCourses.forEach(course => {
             const credits = course.credits / 3; // Each square represents 3 credits
             const courseSquare = document.createElement('div');
-            courseSquare.className = 'square course course-joined';
+            courseSquare.className = 'course';
             courseSquare.style.setProperty('--credits', credits);
             courseSquare.textContent = course.short_name;
             courseSquare.draggable = true;
@@ -950,6 +680,8 @@ function clearPlanner() {
             courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
             courseSquare.dataset.isElective = course.elective;
             courseSquare.dataset.isFreieWahl = false;
+            courseSquare.dataset.recommended_prerequisites = JSON.stringify(course.recommended_prerequisites);
+
 
             // Attach event listeners to the course square
             attachEventListenersToCourse(courseSquare);
@@ -966,14 +698,12 @@ function clearPlanner() {
     }
 
     // Reset electives
-    const electivesDiv = document.getElementById('electives');
-    electivesDiv.innerHTML = ''; // Clear all electives
+    electivesContainer.innerHTML = ''; // Clear all electives
 
-    const electivesCourses = courses.filter(course => course.elective === true);
     electivesCourses.forEach(course => {
         const credits = course.credits / 3; // Each square represents 3 credits
         const courseSquare = document.createElement('div');
-        courseSquare.className = 'square course course-joined';
+        courseSquare.className = 'course';
         courseSquare.style.setProperty('--credits', credits);
         courseSquare.textContent = course.short_name;
         courseSquare.draggable = true;
@@ -989,11 +719,13 @@ function clearPlanner() {
         courseSquare.dataset.prerequisites = JSON.stringify(course.prerequisites);
         courseSquare.dataset.isElective = course.elective;
         courseSquare.dataset.isFreieWahl = false;
+        courseSquare.dataset.recommended_prerequisites = JSON.stringify(course.recommended_prerequisites);
+
 
         // Attach event listeners to the course square
         attachEventListenersToCourse(courseSquare);
 
-        electivesDiv.appendChild(courseSquare);
+        electivesContainer.appendChild(courseSquare);
     });
 
     // Update the info message
@@ -1001,9 +733,18 @@ function clearPlanner() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadStateFromLocalStorage();
+    totalReload();
+});
 
-    // Attach event listeners to all grids and courses
+function totalReload() {
+    const state = localStorage.getItem('coursePlannerState');
+    if (state) {
+        loadStateFromLocalStorage();
+    } else {
+        createStarterSemester();
+        renderElectives();
+    }
+    
     document.querySelectorAll('.grid').forEach(grid => {
         attachEventListenersToGrid(grid);
     });
@@ -1012,23 +753,196 @@ document.addEventListener('DOMContentLoaded', () => {
         attachEventListenersToCourse(course);
     });
 
-    // Add event listener to the clear button
-    const clearButton = document.getElementById('clear-button');
-    clearButton.addEventListener('click', clearPlanner);
+    attachEventListenersToGrid(electivesContainer);
+}
+
+
+document.getElementById('downloadPdfButton').addEventListener('click', downloadSemesterPlanAsPdf);
+
+function downloadSemesterPlanAsPdf() {
+    const infoMessage = document.getElementById('info-message');
+
+    // Create a temporary div to hold the content
+    const tempContainer = document.createElement('div');
+
+    // Add the "Module-Tetris" header
+    const header = document.createElement('h1');
+    header.textContent = 'Module-Tetris';
+    header.style.textAlign = 'center';
+    header.style.fontSize = '24px';
+    header.style.marginBottom = '20px';
+    tempContainer.appendChild(header);
+
+    // Extract text from all <p> inside #info-message
+    infoMessage.querySelectorAll('p').forEach(p => {
+        const clonedP = p.cloneNode(true); // Clone the <p> element
+        tempContainer.appendChild(clonedP);
+    });
+
+    // Clone #semesters and append it to the temporary container
+    const semestersClone = document.getElementById('semesters').cloneNode(true);
+    semestersClone.style.fontSize = '12px'; // Make semester content smaller
+    tempContainer.appendChild(semestersClone);
+
+    // Add footer with hyperlink
+    const footer = document.createElement('p');
+    footer.style.marginTop = '20px';
+    footer.style.fontSize = '12px';
+    footer.style.textAlign = 'center';
+    footer.innerHTML = 'Dieser Semesterplan wurde auf <a href="https://jfhahn.de/tetris" target="_blank">jfhahn.de/tetris</a> erstellt.';
+    tempContainer.appendChild(footer);
+
+    // Define PDF options
+    const options = {
+        margin: [10, 10, 10, 10],
+        filename: 'semester_plan.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Generate and save PDF
+    html2pdf().from(tempContainer).set(options).save();
+}
+
+
+
+
+// LocalStorage stuff
+
+
+let saveTimeout;
+function saveStateToLocalStorage() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        const semesters = Array.from(document.querySelectorAll('.semester'));
+        const state = semesters.map(semester => {
+            const courses = Array.from(semester.querySelectorAll('.course')).map(course => ({
+                id: course.id,
+                short_name: course.dataset.short_name,
+                name: course.dataset.name,
+                credits: course.dataset.credits,
+                credits_needed: course.dataset.credits_needed,
+                semester: course.dataset.semester,
+                intendedSemester: course.dataset.intendedSemester,
+                prerequisites: JSON.parse(course.dataset.prerequisites || "[]"),
+                isElective: course.dataset.isElective === "true",
+                color: course.style.backgroundColor,
+                isFreieWahl: course.dataset.isFreieWahl === "true",
+                recommended_prerequisites: JSON.parse(course.dataset.recommended_prerequisites || "[]"),
+                classnames: course.classList.value
+            }));
+            return {
+                number: semester.dataset.number,
+                courses: courses
+            };
+        });
+
+        localStorage.setItem('coursePlannerState', JSON.stringify(state));
+    }, 200);
+}
+
+function loadStateFromLocalStorage() {
+    const state = localStorage.getItem('coursePlannerState');
+    if (!state) return;
+
+    const semestersData = JSON.parse(state);
+    const placedElectives = new Set();
+
+    semestersContainer.innerHTML = '';
+    semestersData.forEach(semesterData => {
+        const semesterDiv = document.createElement('div');
+        semesterDiv.className = 'semester';
+        semesterDiv.dataset.number = semesterData.number;
+
+        const semesterTitle = document.createElement('p');
+        semesterTitle.textContent = `${semesterData.number}. FS`;
+        semesterDiv.appendChild(semesterTitle);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
+        semesterDiv.appendChild(gridDiv);
+
+        semesterData.courses.forEach(courseData => {
+            const courseSquare = createCourseSquare({
+                short_name: courseData.short_name,
+                name: courseData.name,
+                credits: courseData.credits,
+                credits_needed: courseData.credits_needed,
+                semester: courseData.semester,
+                intended_semester: courseData.intendedSemester,
+                prerequisites: courseData.prerequisites,
+                recommended_prerequisites: courseData.recommended_prerequisites,
+                color: courseData.color,
+            }, courseData.isElective, courseData.isFreieWahl);
+
+            courseSquare.id = courseData.id;
+            courseSquare.className = courseData.classnames;
+            gridDiv.appendChild(courseSquare);
+
+            if (courseData.isElective) {
+                placedElectives.add(courseData.short_name);
+            }
+        });
+
+        attachEventListenersToGrid(semesterDiv);
+
+        semestersContainer.appendChild(semesterDiv);
+    });
+
+    electivesContainer.innerHTML = '';
+    courses.filter(course => course.elective === true && !placedElectives.has(course.short_name)).forEach(course => {
+        const courseSquare = createCourseSquare(course, true);
+        electivesContainer.appendChild(courseSquare);
+    });
+
+    updateInfo();
+}
+
+
+
+
+document.getElementById('downloadJSONButton').addEventListener('click', () => {
+    const state = localStorage.getItem('coursePlannerState');
+    if (!state) {
+        // alert('No state to save!');
+        return;
+    }
+
+    const blob = new Blob([state], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'semester_plan.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 });
 
+document.getElementById('loadJSONButton').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
 
-function attachEventListenersToCourse(courseSquare) {
-    // Drag and Drop event listeners
-    courseSquare.addEventListener('dragstart', dragStart);
-    courseSquare.addEventListener('dragover', dragOver);
-    courseSquare.addEventListener('drop', drop);
-    courseSquare.addEventListener('click', () => {
-        showCourseDetails(courseSquare);
-    });
-}
-function attachEventListenersToGrid(grid) {
-    grid.addEventListener('dragleave', () => grid.classList.remove('highlight'));
-    grid.addEventListener('dragover', dragOver);
-    grid.addEventListener('drop', drop);
-}
+    input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            try {
+                const state = JSON.parse(content);
+                localStorage.setItem('coursePlannerState', JSON.stringify(state));
+                totalReload();
+            } catch (error) {
+                alert('Invalid JSON file!');
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    input.click();
+});

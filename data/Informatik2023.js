@@ -1,5 +1,5 @@
 export const aufteilung = {
-    "menge_wahlpflicht": 51,
+    "menge_wahlpflicht": 48,
     "menge_freie_wahl": 18
 }
 
@@ -440,16 +440,16 @@ export const courses = [
         "recommended_prerequisites": []
     },
     {
-        "short_name": "SWT",
-        "name": "Softwaretechnik",
-        "credits": 9,
+        "short_name": "SEE",
+        "name": "Software Engineering Einführung",
+        "credits": 3,
         "semester": "summer",
-        "intended_semester": null,
-        "prerequisites": ["SE1", "SE2"],
+        "intended_semester": 3,
+        "prerequisites": [],
         "credits_needed": 0,
         "elective": true,
         "color": "#ffffff",
-        "recommended_prerequisites": []
+        "recommended_prerequisites": ["SE1", "SE2"]
     },
     {
         "short_name": "MOBS",

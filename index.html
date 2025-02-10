@@ -10,9 +10,12 @@
 </head>
 <body>
     <h1>Module-Tetris</h1>
-    <p>Mit Drag & Drop kannst du Module bewegen und dein Module-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>    <button id="clear-button">Zurücksetzen</button>
-    <div id="info-message"></div>
-    <div id="error-message"></div>
+    <p>Mit Drag & Drop kannst du Module bewegen und dein Module-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>    
+    <button id="clear-button">Zurücksetzen</button>
+    <button id="downloadPdfButton">Download als PDF</button>
+    <button id="downloadJSONButton">Als Datei speichern</button>  
+    <button id="loadJSONButton">Aus Datei laden</button>  
+    
 
     <h2>Freie Wahl</h2>
     <p></p>
@@ -35,6 +38,9 @@
     <div id="electives" class="electives-container"></div>
     
     <h2>Dein Tetris</h2>
+    <div id="info-message"></div>
+
+    <div id="error-message"></div>
     <div id="semesters" class="semester-container"></div>
 
     <!-- The Overlay -->
@@ -47,6 +53,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="main.js"></script>
+    
 </body>
 </html>
