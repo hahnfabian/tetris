@@ -30,7 +30,7 @@ export const courses = [
     },
     {
         "short_name": "DM",
-        "name": "Discrete Mathematics",
+        "name": "Diskrete Mathematik",
         "credits": 9,
         "semester": "winter",
         "intended_semester": 1,
@@ -66,7 +66,7 @@ export const courses = [
     },
     {
         "short_name": "ALA",
-        "name": "Algorithmen und Datenstrukturen",
+        "name": "Analysis und Lineare Algebra",
         "credits": 9,
         "semester": "summer",
         "intended_semester": 2,

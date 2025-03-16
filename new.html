@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module-Tetris</title>
+    <!-- Add the favicon link here -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="new.css">
+    <!-- Add this to the HTML head -->
+
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <h1>Module-Tetris</h1>
+            <div id="info-message"></div>
+            <div id="error-message"></div>
+        </div>
+        <div class="header-right">
+            <button id="clear-button">Zurücksetzen</button>
+            <button id="downloadPdfButton">Download als PDF</button>
+            <button id="downloadJSONButton">Als Datei speichern</button>  
+            <button id="loadJSONButton">Aus Datei laden</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <!-- Left Column -->
+        <div class="left-column">
+            <h2>Dein Tetris</h2>
+            <div id="semesters" class="semester-container"></div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <div class="right-section">
+                <h2>Wahlpflicht</h2>
+                <p>Du kannst nach WiSe und SoSe filtern...</p>
+                <select id="module-filter">
+                    <!-- options -->
+                </select>
+                <div id="electives" class="electives-container"></div>
+            </div>
+
+            <div class="right-section">
+                <h2>Freie Wahl</h2>
+                <div id="freie-wahl-container">
+                    <input type="text" id="freie-wahl-name" placeholder="Name des Kurses">
+        <input type="number" id="freie-wahl-credits" placeholder="LP" min="1" step="1" max="30">
+        <button id="add-freie-wahl">Kurs hinzufügen</button>
+                </div>
+                <div id="freie-wahl" class="electives-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keep overlay at bottom -->
+    <div id="overlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Overlay Content</h2>
+            <p>This is the overlay content.</p>
+            <!-- Close Button -->
+            <button id="closeOverlay">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module" src="main.js"></script>
+    
+</body>
+</html>

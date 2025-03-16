@@ -7,48 +7,66 @@
     <!-- Add the favicon link here -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
 </head>
 <body>
-    <h1>Module-Tetris</h1>
-    <p>Mit Drag & Drop kannst du Module bewegen und dein Module-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>    
-    <button id="clear-button">Zurücksetzen</button>
-    <button id="downloadPdfButton">Download als PDF</button>
-    <button id="downloadJSONButton">Als Datei speichern</button>  
-    <button id="loadJSONButton">Aus Datei laden</button>  
+    <header>
+        <h1>Module-Tetris</h1>
+        <div id="info-msg-container">
+            <div id="info-total">Gesamt: x von x LP</div>
+            <div id="info-wahlpflicht">Wahlpflicht: x von x LP</div>
+            <div id="info-freie-wahl">Freie Wahl: x von x LP</div>
+            <div id="info-mind-ein-wahlpflicht" class="istNichtFertig">Du musst mindestens ein Wahlpflichtmodul <br> vor dem Abschlussmodul haben.</div>
+        </div>
+        <div id="error-msg-container" >
+            <div id="error-message" class="hidden">Place Holder</div>
+        </div>
+    </header>
     
+    <!-- <p>Mit Drag & Drop kannst du Module bewegen und dein Module-Tetris bauen. Klicke auf ein Modul, um mehr Informationen zu erhalten.</p>     -->
 
-    <h2>Freie Wahl</h2>
-    <p></p>
-    <div id="freie-wahl" class="electives-container"></div>
-    <div id="freie-wahl-container">
-        <input type="text" id="freie-wahl-name" placeholder="Name des Kurses">
-        <input type="number" id="freie-wahl-credits" placeholder="LP" min="1" step="1" max="30">
-        <button id="add-freie-wahl">Kurs hinzufügen</button>
-        <div id="freie-wahl"></div>
+    <div class="split-container">
+        <div class="left-column">
+            <h2>Dein Plan</h2>
+            <p id="hilfe-plan" class="help-p" style="display: none;">Das ist dein Semesterplan. Mit der Drag-and-Drop-Funktion kannst du Module verschieben.</p>            
+            <div id="semesters" class="semester-container"></div>
+        </div>
+        <div class="right-column">
+            <h2>Wahlpflicht</h2>
+            <p id="hilfe-wahlpflicht" class="help-p" style="display: none;">Du kannst die Module nach Winter- und Sommersemester filtern. Klicke auf ein Modul, um es dem Freien Wahlbereich hinzuzufügen.</p>            
+            <select id="module-filter">
+                <option value="all">Alle Module</option>
+                <option value="summer">Sommer Module</option>
+                <option value="winter">Winter Module</option>
+            </select>
+            <div id="electives" class="electives-container"></div>
+    
+            <h2>Freie Wahl</h2>
+            <p id="hilfe-freie-wahl" class="help-p" style="display: none;">Füge hier deine Kurse für den Freien Wahlbereich hinzu. Jeder Kurs benötigt einen Namen und eine Anzahl an Leistungspunkten.</p>  
+            <div id="freie-wahl-container">
+                <input type="text" id="freie-wahl-name" placeholder="Name des Kurses">
+                <input type="number" id="freie-wahl-credits" placeholder="LP" min="1" step="1" max="30">
+                <button id="add-freie-wahl">Kurs hinzufügen</button>
+                <div id="freie-wahl" class="electives-container"></div>
+            </div>          
+            
+
+            <h2>Optionen</h2>
+            <p id="hilfe-optionen" class="help-p" style="display: none;">Speichere deinen Plan als Datei und sende ihn an Freunde, oder lade eine gespeicherte Datei, um den Plan wiederherzustellen.</p>            <div class="options-container">
+                <button id="help-button">Help</button>
+                <button id="clear-button">Zurücksetzen</button>
+                <button id="downloadPdfButton">Als PDF speichern</button>
+                <button id="downloadJSONButton">Als Datei speichern</button>  
+                <button id="loadJSONButton">Aus Datei laden</button>  
+            </div>
+        </div>
     </div>
     
-    <h2>Wahlpflicht</h2>
-    <p>Du kannst nach WiSe und SoSe filtern. Wenn du auf ein Modul klickst, kannst du es zu Freier Wahl machen.</p>
-    <select id="module-filter">
-        <option value="all">Alle Module</option>
-        <option value="summer">Sommer Module</option>
-        <option value="winter">Winter Module</option>
-    </select>
-
-    <div id="electives" class="electives-container"></div>
-    
-    <h2>Dein Tetris</h2>
-    <div id="info-message"></div>
-
-    <div id="error-message"></div>
-    <div id="semesters" class="semester-container"></div>
-
-    <!-- The Overlay -->
     <div id="overlay" class="overlay">
         <div class="overlay-content">
             <h2>Overlay Content</h2>
             <p>This is the overlay content.</p>
-            <!-- Close Button -->
             <button id="closeOverlay">Close</button>
         </div>
     </div>

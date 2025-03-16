@@ -12,7 +12,7 @@ const electivesContainer = document.getElementById('electives');
 const moduleFilter = document.getElementById('module-filter');
 const clearButton = document.getElementById('clear-button');
 const electivesCourses = courses.filter(course => course.elective === true);
-
+const helpButton = document.getElementById('help-button');
 
 let draggedCourse = null;
 
@@ -25,6 +25,8 @@ courses.forEach(course => {
         courseDependencies[prerequisite].push(course.short_name);
     });
 });
+
+helpButton.addEventListener('click', toggleHelp);
 
 clearButton.addEventListener('click', clearPlanner);
 moduleFilter.addEventListener('change', (event) => renderElectives(event.target.value));
@@ -41,6 +43,23 @@ document.addEventListener('keydown', (event) => {
         overlay.style.display = 'none';
     }
 });
+
+function toggleHelp() {
+    // Array of IDs to toggle
+    const toHide = ['hilfe-plan', 'hilfe-wahlpflicht', 'hilfe-freie-wahl', 'hilfe-optionen'];
+
+    toHide.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            // Toggle visibility
+            if (element.style.display === 'none') {
+                element.style.display = ''; // Reset to default display value
+            } else {
+                element.style.display = 'none'; // Hide the element
+            }
+        }
+    });
+}
 
 // Function to create a course square
 function createCourseSquare(course, isElective = false, isFreieWahl = false) {
@@ -96,12 +115,8 @@ function showCourseDetails(course) {
 
     // Add the course details to the overlay
     const courseTitle = document.createElement('h2');
-    courseTitle.textContent = course.dataset.name;  // Course name
+    courseTitle.textContent = course.dataset.name + ' (' + course.dataset.short_name + ')';  // Course name
     overlayContent.appendChild(courseTitle);
-
-    const courseShortName = document.createElement('p');
-    courseShortName.textContent = `Abkürzung: ${course.dataset.short_name}`;  // Short name
-    overlayContent.appendChild(courseShortName);
 
     const courseCredits = document.createElement('p');
     courseCredits.textContent = `Credits: ${course.dataset.credits}`;  // Credits
@@ -180,6 +195,7 @@ function deleteCourse(course) {
     overlay.style.display = 'none';
     updateInfo();
     saveStateToLocalStorage();
+    clearErrorMessage();
 }
 
 
@@ -388,7 +404,7 @@ function drop(event) {
     if (target.id === 'electives') {
         const isElective = draggedCourse.dataset.isElective === "true";
         if (!isElective) {
-            setErrorMessage("Nur Wahlmodule können in den Wahlmodul-Pool gelegt werden.");
+            setErrorMessage("Nur Wahlmodule können in den Wahlmodule-Pool gelegt werden.");
             return;
         }
 
@@ -549,18 +565,19 @@ function cleanupEmptySemesters() {
 
 
 function setErrorMessage(msg) {
-  const errorDiv = document.getElementById('error-message');
-  if (msg) {
+    const errorDiv = document.getElementById('error-message');
     errorDiv.textContent = msg;
-    errorDiv.style.display = 'inline-block'; // Show the error message div
-  } else {
-    errorDiv.style.display = 'none'; // Hide the error message div
-  }
+    errorDiv.classList.remove('hidden');
+
+    errorDiv.style.animation = 'none'; 
+    void errorDiv.offsetWidth;
+    errorDiv.style.animation = 'pulse 1.5s 4 forwards';
 }
 
 
 function clearErrorMessage() {
-    setErrorMessage(''); // Clears the message by passing an empty string
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.classList.add('hidden');
 }
 
 
@@ -569,8 +586,10 @@ function updateInfo() {
     const wahlpflichtNeeded = 51;
     const freieWahlNeeded = 18;
 
-    const infoDiv = document.getElementById('info-message');
-    infoDiv.innerHTML = ""; // Clear previous messages
+    const totalDiv = document.getElementById('info-total');
+    const wahlpflichtDiv = document.getElementById('info-wahlpflicht');
+    const freieWahlDiv = document.getElementById('info-freie-wahl');
+    const warningDiv = document.getElementById('info-mind-ein-wahlpflicht');
 
     const semesters = Array.from(document.querySelectorAll('.semester'));
     let totalCredits = 0;
@@ -585,7 +604,7 @@ function updateInfo() {
             const courseCredits = parseInt(course.dataset.credits, 10);
             const courseName = course.dataset.name;
 
-            if (course.dataset.isElective === "true") { 
+            if (course.dataset.isElective === "true") {
                 if (course.classList.contains('isMarkedAsFreieWahl')) {
                     freieWahlCredits += courseCredits;
                 } else {
@@ -606,14 +625,26 @@ function updateInfo() {
         });
     });
 
-    infoDiv.appendChild(createBlock(`Gesamt: ${totalCredits} von ${totalNeeded} LP`, totalCredits >= totalNeeded));
-    infoDiv.appendChild(createBlock(`Wahlpflicht: ${wahlpflichtCredits} von ${wahlpflichtNeeded} LP`, wahlpflichtCredits >= wahlpflichtNeeded));
-    infoDiv.appendChild(createBlock(`Freie Wahl: ${freieWahlCredits} von ${freieWahlNeeded} LP`, freieWahlCredits >= freieWahlNeeded));
+    // Update the content and styling of the divs
+    updateIsInfoFertig(totalDiv, `Gesamt: ${totalCredits} von ${totalNeeded} LP`, totalCredits >= totalNeeded);
+    updateIsInfoFertig(wahlpflichtDiv, `Wahlpflicht: ${wahlpflichtCredits} von ${wahlpflichtNeeded} LP`, wahlpflichtCredits >= wahlpflichtNeeded);
+    updateIsInfoFertig(freieWahlDiv, `Freie Wahl: ${freieWahlCredits} von ${freieWahlNeeded} LP`, freieWahlCredits >= freieWahlNeeded);
 
-    if (foundAbschlussmodul && !foundElectiveBeforeAbschluss) {
-        infoDiv.appendChild(createBlock( "Du musst mindestens ein Wahlpflichtmodul vor dem Abschlussmodul haben.", false))
+    // Update the warning message
+    if (foundAbschlussmodul && foundElectiveBeforeAbschluss) {
+        warningDiv.classList.add('hidden');
+    } else {
+        warningDiv.classList.remove('hidden');
     }
-        infoDiv.style.display = 'block'; // Show the info message div
+
+    // Show the info message container
+    document.getElementById('info-msg-container').style.display = 'flex';
+}
+
+// Helper function to update a div with content and styling
+function updateIsInfoFertig(div, text, isFertig) {
+    div.textContent = text;
+    div.className = isFertig ? "istFertig" : "istNichtFertig";
 }
 
 
@@ -760,7 +791,7 @@ function totalReload() {
 document.getElementById('downloadPdfButton').addEventListener('click', downloadSemesterPlanAsPdf);
 
 function downloadSemesterPlanAsPdf() {
-    const infoMessage = document.getElementById('info-message');
+    const infoMessage = document.getElementById('info-msg-container');
 
     // Create a temporary div to hold the content
     const tempContainer = document.createElement('div');
@@ -773,7 +804,7 @@ function downloadSemesterPlanAsPdf() {
     header.style.marginBottom = '20px';
     tempContainer.appendChild(header);
 
-    // Extract text from all <p> inside #info-message
+    // Extract text from all <p> inside #info-msg-container
     infoMessage.querySelectorAll('p').forEach(p => {
         const clonedP = p.cloneNode(true); // Clone the <p> element
         tempContainer.appendChild(clonedP);
