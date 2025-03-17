@@ -5,6 +5,7 @@ const overlay = document.getElementById('overlay');
 const closeOverlayButton = document.getElementById('closeOverlay');
 const freieWahlContainer = document.getElementById('freie-wahl');
 const freieWahlNameInput = document.getElementById('freie-wahl-name');
+const freieWahlShortNameInput = document.getElementById('freie-wahl-short-name');
 const freieWahlCreditsInput = document.getElementById('freie-wahl-credits');
 const addFreieWahlButton = document.getElementById('add-freie-wahl');
 const semestersContainer = document.getElementById('semesters');
@@ -202,15 +203,19 @@ function deleteCourse(course) {
 
 
 
-function addFreieWahlClass(name, credits) {
+function addFreieWahlClass(short_name, name, credits) {
     clearErrorMessage();
     if (!name || credits <= 0 || isNaN(credits)) {
         setErrorMessage("Freie Wahl Module brauchen einen Namen und eine Credit Anzahl.");
         return;
     }
 
+    if(!short_name) {
+        short_name = name
+    }
+
     const courseSquare = createCourseSquare({
-        short_name: name,
+        short_name: `${short_name} (FW)`,
         name: name,
         credits: credits,
         credits_needed: 0,
@@ -223,6 +228,7 @@ function addFreieWahlClass(name, credits) {
 
     freieWahlContainer.appendChild(courseSquare);
     freieWahlNameInput.value = "";
+    freieWahlShortNameInput.value ="";
     freieWahlCreditsInput.value = "";
 
     saveStateToLocalStorage();
@@ -232,8 +238,9 @@ function addFreieWahlClass(name, credits) {
 // Event listener for adding new courses
 addFreieWahlButton.addEventListener('click', () => {
     const name = freieWahlNameInput.value.trim();
+    const short_name = freieWahlShortNameInput.value.trim();
     const credits = parseInt(freieWahlCreditsInput.value, 10);
-    addFreieWahlClass(name, credits);
+    addFreieWahlClass(short_name, name, credits);
 });
 
 // // Drag and Drop event listeners for container
@@ -319,8 +326,6 @@ function renderElectives(filter = 'all') {
         }
     });
 }
-
-
 
 
 
@@ -430,7 +435,7 @@ function drop(event) {
         (!isWinterSemester && courseSemesterType === "winter")    // Summer semester but course is for winter
     ) {
         // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Semester type mismatch.`);
-        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht ins ${isWinterSemester ? "Wintersemester" : "Sommersemester"} verschoben werden, da es für das ${courseSemesterType === "winter" ? "Wintersemester" : "Sommersemester"} vorgesehen ist.`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.short_name}" kann nicht ins ${isWinterSemester ? "Wintersemester" : "Sommersemester"} verschoben werden, da es für das ${courseSemesterType === "winter" ? "Wintersemester" : "Sommersemester"} vorgesehen ist.`);
         return;
     }
 
@@ -481,11 +486,10 @@ function drop(event) {
     // If prerequisites or credits are not met, block the move
     if (!prerequisitesMet) {
         // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. Course prerequisites not met:  ${missingPrerequisites}`);
-        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Fehlende Voraussetzungen: ${missingPrerequisites}`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.short_name}" kann nicht in Semester ${semesterNumber} verschoben werden. Fehlende Voraussetzungen: ${missingPrerequisites}`);
         return;
     } else if (!gotNeededCredits) {
-        // console.warn(`Cannot move ${draggedCourse.dataset.name} to semester ${semesterNumber}. You need ${creditDifference} more credits.`);
-        setErrorMessage(`Das Modul "${draggedCourse.dataset.name}" kann nicht in Semester ${semesterNumber} verschoben werden. Es fehlen noch ${creditDifference} Credits.`);
+        setErrorMessage(`Das Modul "${draggedCourse.dataset.short_name}" kann nicht in Semester ${semesterNumber} verschoben werden. Es fehlen noch ${creditDifference} Credits.`);
         return;
     }
 

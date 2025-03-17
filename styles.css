@@ -29,6 +29,7 @@ body {
 }
 .semester p {
     margin-right: 0.625rem;
+    user-select: none;
 }
 
 .button-spacing {
