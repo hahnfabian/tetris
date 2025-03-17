@@ -150,11 +150,16 @@ header {
     padding-right: 1rem;
 }
 
+
 header h1 {
     margin: 0;
-    align-self: flex-start;
 }
 
+#titel {
+    align-self: flex-start;
+    margin: 0;
+
+}
 
 #info-msg-container {
     display: flex;

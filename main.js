@@ -1,5 +1,11 @@
 //ERROR: drag over das highlight und so wird nicht entfernt und doppelte alerts
-import {courses} from './data/courses.js';
+import { courses19 } from './data/courses.js';
+import { courses23 } from './data/Informatik2023.js';
+import { examplePlan } from './data/examplePlan.js';
+
+let courses = courses19;
+let draggedCourse = null;
+let showHelp = false;
 
 const overlay = document.getElementById('overlay');
 const closeOverlayButton = document.getElementById('closeOverlay');
@@ -12,12 +18,17 @@ const semestersContainer = document.getElementById('semesters');
 const electivesContainer = document.getElementById('electives');
 const moduleFilter = document.getElementById('module-filter');
 const clearButton = document.getElementById('clear-button');
-const electivesCourses = courses.filter(course => course.elective === true);
+let electivesCourses = courses.filter(course => course.elective === true);
 const helpButton = document.getElementById('help-button');
+const loadExamplePlanButton = document.getElementById('loadExampleButton');
+const selectYearButton = document.getElementById('selectYearButton');
 
-let draggedCourse = null;
+if (selectYearButton) {
+    selectYearButton.addEventListener('change', (event) => changeYear(event.target.value));
+} 
 
-const courseDependencies = {};
+
+let courseDependencies = {};
 courses.forEach(course => {
     course.prerequisites.forEach(prerequisite => {
         if (!courseDependencies[prerequisite]) {
@@ -27,6 +38,8 @@ courses.forEach(course => {
     });
 });
 
+
+loadExamplePlanButton.addEventListener('click', loadExamplePlan);
 helpButton.addEventListener('click', toggleHelp);
 
 clearButton.addEventListener('click', clearPlanner);
@@ -46,20 +59,16 @@ document.addEventListener('keydown', (event) => {
 });
 
 function toggleHelp() {
-    // Array of IDs to toggle
     const toHide = ['hilfe-plan', 'hilfe-wahlpflicht', 'hilfe-freie-wahl', 'hilfe-optionen'];
 
+    showHelp = !showHelp;
     toHide.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            // Toggle visibility
-            if (element.style.display === 'none') {
-                element.style.display = ''; // Reset to default display value
-            } else {
-                element.style.display = 'none'; // Hide the element
-            }
+            element.style.display = showHelp ? 'block' : 'none';
         }
     });
+    helpButton.textContent = showHelp ? 'Hilfe ausblenden' : 'Hilfe anzeigen';
 }
 
 // Function to create a course square
@@ -102,9 +111,6 @@ function attachEventListenersToGrid(grid) {
     grid.addEventListener('drop', drop);
     grid.addEventListener('dragend', restoreOpacity);
 }
-
-
-
 
 
 // This function will populate the overlay with the course's details
@@ -199,10 +205,6 @@ function deleteCourse(course) {
     clearErrorMessage();
 }
 
-
-
-
-
 function addFreieWahlClass(short_name, name, credits) {
     clearErrorMessage();
     if (!name || credits <= 0 || isNaN(credits)) {
@@ -279,6 +281,11 @@ function createStarterSemester() {
         semesterTitle.textContent = `${semester}. FS`;
         semesterDiv.appendChild(semesterTitle);
 
+        const creditsDisplay = document.createElement('p');
+        creditsDisplay.className = 'credits-display';
+        creditsDisplay.textContent = '0 LP';
+        semesterDiv.appendChild(creditsDisplay);
+
         const gridDiv = document.createElement('div');
         gridDiv.className = 'grid';
 
@@ -299,7 +306,6 @@ function createStarterSemester() {
 
 
 // Space for electives
-
 function renderElectives(filter = 'all') {
     function getPlacedCourses() {
         const placedCourses = new Set();
@@ -326,9 +332,6 @@ function renderElectives(filter = 'all') {
         }
     });
 }
-
-
-
 
 
 document.querySelectorAll('.grid').forEach(grid => {
@@ -371,7 +374,6 @@ function restoreOpacity() {
     const allSemesterDivs = document.querySelectorAll('.semester');
     allSemesterDivs.forEach(semesterDiv => {semesterDiv.style.opacity = '1';});
 }
-
 
 function dragOver(event) { 
     event.preventDefault();
@@ -544,8 +546,6 @@ function drop(event) {
     saveStateToLocalStorage();
 }
 
-
-
 // Function to check and remove excess empty semesters
 function cleanupEmptySemesters() {
     const semesters = Array.from(document.querySelectorAll('.semester'));
@@ -567,7 +567,6 @@ function cleanupEmptySemesters() {
     }
 }
 
-
 function setErrorMessage(msg) {
     const errorDiv = document.getElementById('error-message');
     errorDiv.textContent = msg;
@@ -583,7 +582,6 @@ function clearErrorMessage() {
     const errorDiv = document.getElementById('error-message');
     errorDiv.classList.add('hidden');
 }
-
 
 function updateInfo() {
     const totalNeeded = 180;
@@ -652,16 +650,16 @@ function updateIsInfoFertig(div, text, isFertig) {
 }
 
 
-function createBlock(value, istFertig) {
-    const block = document.createElement("div");
-    block.classList.add(istFertig ? "istFertig" : "istNichtFertig");
+// function createBlock(value, istFertig) {
+//     const block = document.createElement("div");
+//     block.classList.add(istFertig ? "istFertig" : "istNichtFertig");
     
-    const titleElement = document.createElement("p");
-    titleElement.textContent = value;
-    block.appendChild(titleElement);
+//     const titleElement = document.createElement("p");
+//     titleElement.textContent = value;
+//     block.appendChild(titleElement);
     
-    return block;
-}
+//     return block;
+// }
 
 
 updateInfo();
@@ -809,9 +807,9 @@ function downloadSemesterPlanAsPdf() {
     tempContainer.appendChild(header);
 
     // Extract text from all <p> inside #info-msg-container
-    infoMessage.querySelectorAll('p').forEach(p => {
-        const clonedP = p.cloneNode(true); // Clone the <p> element
-        tempContainer.appendChild(clonedP);
+    infoMessage.querySelectorAll('div').forEach(div => {
+        const cloned = div.cloneNode(true); // Clone the <p> element
+        tempContainer.appendChild(cloned);
     });
 
     // Clone #semesters and append it to the temporary container
@@ -886,6 +884,8 @@ function loadStateFromLocalStorage() {
 
     semestersContainer.innerHTML = '';
     semestersData.forEach(semesterData => {
+        let creditsCounter = 0;
+
         const semesterDiv = document.createElement('div');
         semesterDiv.className = 'semester';
         semesterDiv.dataset.number = semesterData.number;
@@ -918,7 +918,10 @@ function loadStateFromLocalStorage() {
             if (courseData.isElective) {
                 placedElectives.add(courseData.short_name);
             }
+
+            creditsCounter = creditsCounter + courseData.credits;
         });
+        
 
         attachEventListenersToGrid(semesterDiv);
 
@@ -933,8 +936,6 @@ function loadStateFromLocalStorage() {
 
     updateInfo();
 }
-
-
 
 
 document.getElementById('downloadJSONButton').addEventListener('click', () => {
@@ -981,3 +982,41 @@ document.getElementById('loadJSONButton').addEventListener('click', () => {
 
     input.click();
 });
+
+function loadExamplePlan() {
+    const userConfirmed = confirm("Das wird deinen momentanen Plan überschreiben. Möchtest du fortfahren?");
+
+    if (userConfirmed) {
+        localStorage.setItem('coursePlannerState', JSON.stringify(examplePlan));
+        totalReload();
+    }
+}
+
+
+function changeYear(year = '19') {
+    console.log("Changing year to: " + year);
+    if (year === '19') {
+        courses = courses19;
+    } else if (year === '23') {
+        courses = courses23;
+    } else {
+        console.error('Invalid year selected');
+        return;
+    }
+    setCourses(courses);
+    clearPlanner();
+    renderElectives();
+}
+
+function setCourses(newCourses) {
+    electivesCourses = newCourses.filter(course => course.elective === true);
+    courseDependencies = {};
+    newCourses.forEach(course => {
+        course.prerequisites.forEach(prerequisite => {
+            if (!courseDependencies[prerequisite]) {
+                courseDependencies[prerequisite] = [];
+            }
+            courseDependencies[prerequisite].push(course.short_name);
+        });
+    });
+}

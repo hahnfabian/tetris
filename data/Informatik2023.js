@@ -1,9 +1,9 @@
-export const aufteilung = {
+export const aufteilung23 = {
     "menge_wahlpflicht": 48,
     "menge_freie_wahl": 18
 }
 
-export const courses = [
+export const courses23 = [
     {
         "short_name": "SE1",
         "name": "Softwareentwicklung I",

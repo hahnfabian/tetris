@@ -3,7 +3,7 @@ export const aufteilung = {
     "menge_freie_wahl": 18
 }
 
-export const courses = [
+export const courses19 = [
     {
         "short_name": "SE1",
         "name": "Softwareentwicklung I",
