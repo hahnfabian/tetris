@@ -4,4 +4,6 @@ Module-Tetris hilft dir, deinen Studienverlauf zu planen. Wenn du ein Problem ge
 ## Ideen  
 - [ ] Mobile Version  
 - [ ] Option für verschiedene Studienanfänge  
-- [ ] Unterstützung für verwandte Studiengänge (SSE, MCI, ..)  
+- [ ] Unterstützung für verwandte Studiengänge (SSE, MCI, ..)
+
+(Und Disclaimer: das ist alles der schlimmste Spaghetti-Code)
