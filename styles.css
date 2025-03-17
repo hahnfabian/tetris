@@ -82,27 +82,10 @@ body {
 
 
 
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
 
-.overlay-content {
-    background: white;
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-    width: 43.75rem;
-    margin: auto;
-}
+
+
+
 
 .isMarkedAsFreieWahl {
     background-color: #ffcc82 !important;
@@ -222,3 +205,148 @@ align-self: flex-start;
     }
 }
 
+
+
+
+/* Overlay Container */
+.overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+    z-index: 1000; /* Ensure it's on top */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Overlay Content Box */
+.overlay-content {
+    background: white;
+    padding: 2rem; /* Increased padding */
+    border-radius: 0.75rem; /* Slightly larger radius */
+    width: min(90%, 900px); /* Increased width */
+    max-height: 90vh; /* Prevent overflow */
+    overflow-y: auto; /* Scroll if content is too long */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+/* Overlay Header */
+.overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.overlay-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333; /* Dark text for contrast */
+}
+
+.close-btn {
+    background: #f0f0f0; /* Light gray background */
+    border: none;
+    width: 2.5rem; /* Fixed size */
+    height: 2.5rem; /* Fixed size */
+    border-radius: 50%; /* Circular shape */
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666; /* Neutral gray */
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #e0e0e0; /* Slightly darker gray on hover */
+    color: #333; /* Darker text on hover */
+}
+
+/* Details Section */
+.overlay-details {
+    margin-bottom: 1.5rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee; /* Light separator */
+}
+
+.detail-row:last-child {
+    border-bottom: none; /* No border for last row */
+}
+
+.detail-label {
+    font-weight: bold;
+    color: #555; /* Slightly muted text */
+}
+
+.detail-value {
+    color: #333; /* Darker text for values */
+}
+
+/* Grade Selector */
+.grade-section {
+    margin: 1.5rem 0;
+}
+
+.grade-section label {
+    margin-right: 0.5rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.grade-section select {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    transition: border-color 0.2s ease;
+}
+
+.grade-section select:hover {
+    border-color: #007bff; /* Highlight on hover */
+}
+
+/* Action Buttons */
+.overlay-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.action-btn.primary {
+    background-color: #007bff; /* Blue for primary actions */
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.action-btn.delete-btn {
+    background-color: #dc3545; /* Red for delete actions */
+    color: white;
+}
+
+.action-btn.delete-btn:hover {
+    background-color: #a71d2a; /* Darker red on hover */
+}

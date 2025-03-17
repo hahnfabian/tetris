@@ -92,6 +92,7 @@ function createCourseSquare(course, isElective = false, isFreieWahl = false) {
         isElective: isElective,
         isFreieWahl: isFreieWahl,
         recommended_prerequisites: JSON.stringify(course.recommended_prerequisites),
+        grade: course.grade || 2.0
     }).forEach(([key, value]) => courseSquare.dataset[key] = value);
 
     attachEventListenersToCourse(courseSquare);
@@ -116,78 +117,155 @@ function attachEventListenersToGrid(grid) {
 // This function will populate the overlay with the course's details
 function showCourseDetails(course) {
     const overlayContent = document.querySelector('.overlay-content');
-    
-    // Clear any existing content in the overlay
     overlayContent.innerHTML = '';
 
-    // Add the course details to the overlay
+    // Header Section
+    const header = document.createElement('div');
+    header.className = 'overlay-header';
+
     const courseTitle = document.createElement('h2');
-    courseTitle.textContent = course.dataset.name + ' (' + course.dataset.short_name + ')';  // Course name
-    overlayContent.appendChild(courseTitle);
+    courseTitle.textContent = `${course.dataset.name} (${course.dataset.short_name})`;
+    header.appendChild(courseTitle);
 
-    const courseCredits = document.createElement('p');
-    courseCredits.textContent = `Credits: ${course.dataset.credits}`;  // Credits
-    overlayContent.appendChild(courseCredits);
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.className = 'close-btn';
+    closeBtn.addEventListener('click', () => overlay.style.display = 'none');
+    header.appendChild(closeBtn);
 
-    const coursePrerequisites = document.createElement('p');
+    overlayContent.appendChild(header);
+
+    // Details Section
+    const details = document.createElement('div');
+    details.className = 'overlay-details';
+
+    const createDetailRow = (label, value) => {
+        const row = document.createElement('div');
+        row.className = 'detail-row';
+        
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'detail-label';
+        labelSpan.textContent = label;
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'detail-value';
+        valueSpan.textContent = value;
+
+        row.appendChild(labelSpan);
+        row.appendChild(valueSpan);
+        return row;
+    };
+
+    details.appendChild(createDetailRow('Credits:', course.dataset.credits));
+
     const prerequisites = JSON.parse(course.dataset.prerequisites);
-    coursePrerequisites.textContent = `Voraussetzungen: ${prerequisites.length > 0 ? prerequisites.join(', ') : 'Keine'}`;  // Prerequisites
-    overlayContent.appendChild(coursePrerequisites);
+    details.appendChild(createDetailRow('Voraussetzungen:', 
+        prerequisites.length > 0 ? prerequisites.join(', ') : 'Keine'));
 
-    const courseRecommendedPrerequisites = document.createElement('p');
-    console.log(course.dataset.recommended_prerequisites)
-    const recommendedPrerequisites = JSON.parse(course.dataset.recommended_prerequisites || "[]")
-    courseRecommendedPrerequisites.textContent = `Vorwissen empfohlen: ${recommendedPrerequisites.length > 0 ? recommendedPrerequisites.join(', ') : 'Nein'}`;  // Prerequisites
-    overlayContent.appendChild(courseRecommendedPrerequisites);
+    const recommended = JSON.parse(course.dataset.recommended_prerequisites || "[]");
+    details.appendChild(createDetailRow('Empfohlenes Vorwissen:', 
+        recommended.length > 0 ? recommended.join(', ') : 'Nein'));
 
-    const creditsPrerequisites = document.createElement('p');
-    const creditsNeededOverlay = course.dataset.credits_needed; 
-    creditsPrerequisites.textContent = `Benötigte Credits: ${creditsNeededOverlay}`;  // Prerequisites
-    overlayContent.appendChild(creditsPrerequisites);
+    details.appendChild(createDetailRow('Benötigte Credits:', course.dataset.credits_needed));
+    details.appendChild(createDetailRow('Wahlpflicht:', 
+        course.dataset.isElective === 'true' ? 'Ja' : 'Nein'));
 
-    const courseIsElective = document.createElement('p');
-    courseIsElective.textContent = `Wahlpflicht: ${course.dataset.isElective === 'true' ? 'Ja' : 'Nein'}`;  // Elective or not
-    overlayContent.appendChild(courseIsElective);
+    overlayContent.appendChild(details);
 
-    // Add the toggle button for elective status
-    if (course.dataset.isElective === 'true') {
-        const toggleBtn = document.createElement('button');
-        toggleBtn.textContent = course.classList.contains('isMarkedAsFreieWahl') == false ? 'Als Freie Wahl anrechnen lassen' : 'Als Wahlpflicht anrechnen lassen';
-        toggleBtn.id = 'toggleElectiveStatus';
-        toggleBtn.classList.add('button-spacing');
-        toggleBtn.addEventListener('click', (event) => {
-            // console.log("Toggle function executed", course);
-            event.stopPropagation();
-            toggleElectiveStatus(course);
+    // Grade Selector (if applicable)
+    if (course.dataset.isFreieWahl !== "true" &&
+        course.dataset.short_name !== "MK" &&
+        course.dataset.short_name !== "Pros") {
+        const gradeSection = document.createElement('div');
+        gradeSection.className = 'grade-section';
+
+        const gradeLabel = document.createElement('label');
+        gradeLabel.textContent = 'Note:';
+        gradeLabel.htmlFor = 'grade-select';
+        gradeSection.appendChild(gradeLabel);
+
+        const gradeSelect = document.createElement('select');
+        gradeSelect.id = 'grade-select';
+        [null, 1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0].forEach(grade => {
+            const option = document.createElement('option');
+            option.value = grade || '';
+            option.textContent = grade !== null ? grade.toFixed(1) : '-- Note wählen --';
+            if (course.dataset.grade == grade) option.selected = true;
+            gradeSelect.appendChild(option);
         });
-        overlayContent.appendChild(toggleBtn);
-    } else if (course.dataset.isFreieWahl === 'true') {
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = "Kurs löschen";
-        deleteBtn.id = 'deleteFreieWahlBtn';
-        deleteBtn.classList.add('button-spacing');
-        deleteBtn.addEventListener('click', (event) => {
-            deleteCourse(course);
-            event.stopPropagation();
+
+        gradeSelect.addEventListener('change', (e) => {
+            course.dataset.grade = e.target.value;
+            updateAverage();
+            saveStateToLocalStorage();
         });
-        overlayContent.appendChild(deleteBtn);
+
+        gradeSection.appendChild(gradeSelect);
+        overlayContent.appendChild(gradeSection);
     }
 
+    // Action Buttons
+    const actions = document.createElement('div');
+    actions.className = 'overlay-actions';
 
-    // Add the Close button to the overlay
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
-    closeBtn.id = 'closeOverlay';
-    closeBtn.classList.add('button-spacing');
-    closeBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        overlay.style.display = 'none';
-    });
-    overlayContent.appendChild(closeBtn);
+    if (course.dataset.isElective === 'true') {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'action-btn';
+        toggleBtn.textContent = course.classList.contains('isMarkedAsFreieWahl') ? 
+            'Als Wahlpflicht anrechnen' : 'Als Freie Wahl anrechnen';
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleElectiveStatus(course);
+        });
+        actions.appendChild(toggleBtn);
+    }
 
-    // Show the overlay
+    if (course.dataset.isFreieWahl === 'true') {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn delete-btn';
+        deleteBtn.textContent = 'Kurs löschen';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteCourse(course);
+        });
+        actions.appendChild(deleteBtn);
+    }
+
+    overlayContent.appendChild(actions);
     overlay.style.display = 'flex';
 }
+
+function updateAverage() {
+    const averageContainer = document.getElementById('average-display');
+    let totalCredits = 0;
+    let weightedSum = 0;
+
+    document.querySelectorAll('.course[data-grade]').forEach(course => {
+        if (course.dataset.isFreieWahl === "true" ||
+            course.dataset.short_name === "MK" ||
+            course.dataset.short_name === "Pros") {
+            return;
+        }
+        
+        const credits = parseInt(course.dataset.credits);
+        const grade = parseFloat(course.dataset.grade);
+        if (isNaN(credits)) return;
+
+        // Abschlussmodul 4-fach gewichten
+        let multiplier = 1;
+        if (course.dataset.short_name === "Abschlussmodul") {
+            multiplier = 4;
+        }
+
+        totalCredits += credits * multiplier;
+        weightedSum += grade * credits * multiplier;
+    });
+
+    const average = totalCredits > 0 ? (weightedSum / totalCredits).toFixed(3) : 0;
+    averageContainer.textContent = `Durchschnitt: ${average}`;
+}
+
+
 
 function toggleElectiveStatus(course) {
     course.classList.toggle('isMarkedAsFreieWahl');
@@ -641,6 +719,8 @@ function updateInfo() {
 
     // Show the info message container
     document.getElementById('info-msg-container').style.display = 'flex';
+
+    updateAverage();
 }
 
 // Helper function to update a div with content and styling
@@ -863,7 +943,8 @@ function saveStateToLocalStorage() {
                 color: course.style.backgroundColor,
                 isFreieWahl: course.dataset.isFreieWahl === "true",
                 recommended_prerequisites: JSON.parse(course.dataset.recommended_prerequisites || "[]"),
-                classnames: course.classList.value
+                classnames: course.classList.value,
+                grade: course.dataset.grade || 2.0
             }));
             return {
                 number: semester.dataset.number,
@@ -909,6 +990,7 @@ function loadStateFromLocalStorage() {
                 prerequisites: courseData.prerequisites,
                 recommended_prerequisites: courseData.recommended_prerequisites,
                 color: courseData.color,
+                grade: courseData.grade
             }, courseData.isElective, courseData.isFreieWahl);
 
             courseSquare.id = courseData.id;
