@@ -6,5 +6,6 @@ Module-Tetris hilft dir, deinen Studienverlauf zu planen. Wenn du ein Problem ge
 - [ ] Option für verschiedene Studienanfänge  
 - [ ] Unterstützung für verwandte Studiengänge (SSE, MCI, ...)
 - [ ] Freie Wahl bearbeiten können
+- [ ] Button: Abhängigkeitsregeln deaktivieren
 
 (Und Disclaimer: das ist alles der schlimmste Spaghetti-Code)
