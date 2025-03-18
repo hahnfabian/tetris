@@ -8,5 +8,6 @@ Module-Tetris hilft dir, deinen Studienverlauf zu planen. Wenn du ein Problem ge
 - [ ] Freie Wahl bearbeiten können
 - [ ] Button: Abhängigkeitsregeln deaktivieren
 - [ ] Infos als Progressbar
+- [ ] Button: Noten ausblenden
 
 (Und Disclaimer: das ist alles der schlimmste Spaghetti-Code)
