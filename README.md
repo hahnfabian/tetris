@@ -9,5 +9,7 @@ Module-Tetris hilft dir, deinen Studienverlauf zu planen. Wenn du ein Problem ge
 - [ ] Button: Abhängigkeitsregeln deaktivieren
 - [ ] Infos als Progressbar
 - [ ] Button: Noten ausblenden
+- [ ] Freie Wahl: Modul klonen
+- [ ] Die klassiker FW (Klimaring) anbieten
 
 (Und Disclaimer: das ist alles der schlimmste Spaghetti-Code)
