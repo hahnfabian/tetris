@@ -2,11 +2,14 @@
 import { courses19 } from './data/courses.js';
 import { courses23 } from './data/Informatik2023.js';
 import { examplePlan } from './data/examplePlan.js';
+import { fw_courses } from './data/fw_courses.js';
 
 let courses = courses19;
 let draggedCourse = null;
 let showHelp = false;
+let showGrades = true; 
 
+const toggleGradesButton = document.getElementById('toggleGradesButton');
 const overlay = document.getElementById('overlay');
 const closeOverlayButton = document.getElementById('closeOverlay');
 const freieWahlContainer = document.getElementById('freie-wahl');
@@ -26,7 +29,7 @@ const selectYearButton = document.getElementById('selectYearButton');
 if (selectYearButton) {
     selectYearButton.addEventListener('change', (event) => changeYear(event.target.value));
 } 
-
+toggleGradesButton.addEventListener('click', toggleGradeVisibility);
 
 let courseDependencies = {};
 courses.forEach(course => {
@@ -175,7 +178,9 @@ function showCourseDetails(course) {
     // Grade Selector (if applicable)
     if (course.dataset.isFreieWahl !== "true" &&
         course.dataset.short_name !== "MK" &&
-        course.dataset.short_name !== "Pros") {
+        course.dataset.short_name !== "Pros" &&
+        showGrades
+        ) {
         const gradeSection = document.createElement('div');
         gradeSection.className = 'grade-section';
 
@@ -208,6 +213,30 @@ function showCourseDetails(course) {
     const actions = document.createElement('div');
     actions.className = 'overlay-actions';
 
+    // Klonen-Button für Freie Wahl Kurse
+    if (course.dataset.isFreieWahl === 'true') {
+        const cloneBtn = document.createElement('button');
+        cloneBtn.className = 'action-btn';
+        cloneBtn.textContent = 'Kurs duplizieren';
+        cloneBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cloneCourse(course);
+        });
+        actions.appendChild(cloneBtn);
+    }
+
+    // Bearbeiten-Button für Freie Wahl Kurse
+    if (course.dataset.isFreieWahl === 'true') {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'action-btn';
+        editBtn.textContent = 'Kurs bearbeiten';
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showEditForm(course);
+        });
+        actions.appendChild(editBtn);
+    }
+
     if (course.dataset.isElective === 'true') {
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'action-btn';
@@ -234,6 +263,154 @@ function showCourseDetails(course) {
     overlayContent.appendChild(actions);
     overlay.style.display = 'flex';
 }
+
+
+function cloneCourse(course) {
+    const courseData = {
+        short_name: course.dataset.short_name.replace(/ \(FW\)$/, ''),
+        name: course.dataset.name,
+        credits: parseInt(course.dataset.credits),
+        color: course.style.backgroundColor
+    };
+    
+    addFreieWahlClass(
+        courseData.short_name,
+        courseData.name,
+        courseData.credits,
+        courseData.color
+    );
+    overlay.style.display = 'none';
+}
+
+
+function toggleGradeVisibility() {
+    showGrades = !showGrades;
+    toggleGradesButton.textContent = showGrades ? 'Noten verstecken' : 'Noten anzeigen';
+    
+    // Durchschnitt anzeigen/verstecken
+    document.getElementById('average-display').style.display = showGrades ? 'block' : 'none';
+    
+    // Grade-Selectoren in vorhandenen Kursen aktualisieren
+    document.querySelectorAll('.course').forEach(course => {
+        if (course.dataset.isFreieWahl !== "true" && 
+            course.dataset.short_name !== "MK" && 
+            course.dataset.short_name !== "Pros") {
+            const gradeSection = course.querySelector('.grade-section');
+            if (gradeSection) {
+                gradeSection.style.display = showGrades ? 'block' : 'none';
+            }
+        }
+    });
+
+    // Zustand speichern
+    localStorage.setItem('showGrades', showGrades);
+}
+
+const savedGradeState = localStorage.getItem('showGrades');
+if (savedGradeState !== null) {
+    showGrades = savedGradeState === 'true';
+    toggleGradesButton.textContent = showGrades ? 'Noten verstecken' : 'Noten anzeigen';
+    document.getElementById('average-display').style.display = showGrades ? 'block' : 'none';
+}
+
+
+function showEditForm(course) {
+    const overlayContent = document.querySelector('.overlay-content');
+    overlayContent.innerHTML = '';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'overlay-header';
+    
+    const title = document.createElement('h2');
+    title.textContent = 'Kurs bearbeiten';
+    header.appendChild(title);
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.className = 'close-btn';
+    closeBtn.addEventListener('click', () => overlay.style.display = 'none');
+    header.appendChild(closeBtn);
+    
+    overlayContent.appendChild(header);
+
+    // Formular
+    const form = document.createElement('div');
+    form.className = 'edit-form';
+    
+    // Styling für vertikale Anordnung
+    form.style.display = 'flex';
+    form.style.flexDirection = 'column';
+    form.style.gap = '15px';
+
+    // Name Feld
+    const nameContainer = document.createElement('div');
+    nameContainer.className = 'form-row';
+    
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Name:';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = course.dataset.name;
+    
+    nameContainer.appendChild(nameLabel);
+    nameContainer.appendChild(nameInput);
+
+    // Kürzel Feld
+    const shortNameContainer = document.createElement('div');
+    shortNameContainer.className = 'form-row';
+    
+    const shortNameLabel = document.createElement('label');
+    shortNameLabel.textContent = 'Kürzel:';
+    const shortNameInput = document.createElement('input');
+    shortNameInput.type = 'text';
+    shortNameInput.value = course.dataset.short_name.replace(/ \(FW\)$/, '');
+    
+    shortNameContainer.appendChild(shortNameLabel);
+    shortNameContainer.appendChild(shortNameInput);
+
+    // LP Feld
+    const creditsContainer = document.createElement('div');
+    creditsContainer.className = 'form-row';
+    
+    const creditsLabel = document.createElement('label');
+    creditsLabel.textContent = 'LP:';
+    const creditsInput = document.createElement('input');
+    creditsInput.type = 'number';
+    creditsInput.value = course.dataset.credits;
+    
+    creditsContainer.appendChild(creditsLabel);
+    creditsContainer.appendChild(creditsInput);
+
+    // Elemente zum Formular hinzufügen
+    form.appendChild(nameContainer);
+    form.appendChild(shortNameContainer);
+    form.appendChild(creditsContainer);
+
+    // Speichern-Button
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'action-btn';
+    saveBtn.textContent = 'Speichern';
+    saveBtn.style.alignSelf = 'flex-start'; // Linksbündig
+    saveBtn.style.marginTop = '15px';
+    
+    saveBtn.addEventListener('click', () => {
+        course.dataset.name = nameInput.value.trim();
+        course.dataset.short_name = `${shortNameInput.value.trim()} (FW)`;
+        course.dataset.credits = creditsInput.value;
+        course.textContent = `${shortNameInput.value.trim()} (FW)`;
+        course.style.setProperty('--credits', creditsInput.value / 3);
+        
+        updateInfo();
+        saveStateToLocalStorage();
+        overlay.style.display = 'none';
+    });
+
+    form.appendChild(saveBtn);
+    overlayContent.appendChild(form);
+    overlay.style.display = 'flex';
+}
+
 
 function updateAverage() {
     const averageContainer = document.getElementById('average-display');
@@ -329,6 +506,14 @@ addFreieWahlButton.addEventListener('click', () => {
 // freieWahlContainer.addEventListener('dragleave', () => freieWahlContainer.classList.remove('highlight'));
 
 attachEventListenersToGrid(freieWahlContainer);
+
+
+fw_courses.forEach(course => {
+    const courseSquare =  createCourseSquare(course, false, true);
+
+    freieWahlContainer.appendChild(courseSquare);
+});
+
 
 // die 3 basic Freie Wahl kurse #ffcc82
 for (let freieWahlGröße = 1; freieWahlGröße <= 3; freieWahlGröße++) {

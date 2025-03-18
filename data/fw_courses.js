@@ -2,7 +2,7 @@
 
 export const fw_courses = [
     {
-        "short_name": "Klima-RVL",
+        "short_name": "Klima",
         "name": "Ringvorlesung zur Klimakrise",
         "credits": 3,
         "semester": "both",
@@ -10,6 +10,7 @@ export const fw_courses = [
         "prerequisites": [],
         "credits_needed": 0,
         "elective": false,
-        "color": "#759fec"
-    },
+        "color": "#ffcc82",
+        "recommended_prerequisites": []
+    }
 ]
