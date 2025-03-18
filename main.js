@@ -794,7 +794,7 @@ function clearPlanner() {
             courseSquare.dataset.isElective = course.elective;
             courseSquare.dataset.isFreieWahl = false;
             courseSquare.dataset.recommended_prerequisites = JSON.stringify(course.recommended_prerequisites);
-
+            courseSquare.dataset.grade = 2.0;
 
             // Attach event listeners to the course square
             attachEventListenersToCourse(courseSquare);
