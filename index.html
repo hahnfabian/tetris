@@ -61,14 +61,28 @@
 
             <h2>Optionen</h2>
             <p id="hilfe-optionen" class="help-p" style="display: none;">Speichere deinen Plan als Datei und sende ihn an Freunde, oder lade eine gespeicherte Datei, um den Plan wiederherzustellen.</p>            <div class="options-container">
+            <div class="option-group">
+                <h3>Hilfe & Einstellungen</h3>
                 <button id="help-button">Hilfe anzeigen</button>
                 <button id="clear-button">Zurücksetzen</button>
-                <button id="downloadPdfButton">Als PDF speichern</button>
-                <button id="downloadJSONButton">Als Datei speichern</button>  
-                <button id="loadJSONButton">Aus Datei laden</button>  
-                <button id="loadExampleButton">Beispiel laden</button>  
-                <button id="toggleGradesButton" class="options-btn">Noten verstecken</button>
-                <button id="showGradesList">Notenübersicht anzeigen</button>
+                <button id="loadExampleButton">Beispiel</button>  
+            </div>
+            <div class="option-group">
+                <h3>Dateiverwaltung</h3>
+                <div class="button-group">
+                    <button id="downloadPdfButton">Als PDF speichern</button>
+                    <button id="downloadJSONButton">Als Datei speichern</button>  
+                    <button id="loadJSONButton">Aus Datei laden</button>  
+                </div>
+            </div>
+            <div class="option-group">
+                <h3>Notenverwaltung</h3>
+                <div class="button-group">
+                    <button id="toggleGradesButton" class="options-btn">Noten verstecken</button>
+                    <button id="showGradesList">Notenübersicht anzeigen</button>
+                </div>
+            </div>
+               
                 <!-- <select id="selectYearButton">
                     <option value="19">Studienstart 2019-2022</option>
                     <option value="23">Studienstart ab 2023</option>
