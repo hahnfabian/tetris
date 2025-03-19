@@ -191,7 +191,7 @@ function showCourseDetails(course) {
 
         const gradeSelect = document.createElement('select');
         gradeSelect.id = 'grade-select';
-        [null, 1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0].forEach(grade => {
+        [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0].forEach(grade => {
             const option = document.createElement('option');
             option.value = grade || '';
             option.textContent = grade !== null ? grade.toFixed(1) : '-- Note wählen --';
@@ -417,7 +417,7 @@ function updateAverage() {
     let totalCredits = 0;
     let weightedSum = 0;
 
-    document.querySelectorAll('.course[data-grade]').forEach(course => {
+    document.querySelectorAll('.semester .course[data-grade]').forEach(course => {
         if (course.dataset.isFreieWahl === "true" ||
             course.dataset.short_name === "MK" ||
             course.dataset.short_name === "Pros") {
@@ -804,6 +804,7 @@ function drop(event) {
     }
 
     // Check and clean up empty semesters
+    updateAverage();
     cleanupEmptySemesters();
     updateInfo();
     saveStateToLocalStorage();
