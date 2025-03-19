@@ -238,7 +238,6 @@ align-self: flex-start;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
 }
 
 .overlay-header h2 {
@@ -374,3 +373,78 @@ align-self: flex-start;
     width: 100%;
 }
 
+#grades-view {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.grade-semester-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ccc;
+}
+
+.grade-course-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f5f5f5;
+    border-radius: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+.grades-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.grade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.course-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.course-short {
+    font-weight: bold;
+    min-width: 60px;
+}
+
+.grade-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.semester-divider {
+    height: 2px;
+    background: #ccc;
+    margin: 20px 0;
+}
+
+.overlay-content h2 {
+    margin-bottom: 20px;
+}
+
+.overlay-content h3 {
+    color: #666;
+    margin: 15px 0;
+}

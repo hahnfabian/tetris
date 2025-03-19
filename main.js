@@ -1288,3 +1288,122 @@ function setCourses(newCourses) {
         });
     });
 }
+
+
+document.getElementById('showGradesList').addEventListener('click', showGradesList);
+function showGradesList() {
+    const overlayContent = document.querySelector('.overlay-content');
+    overlayContent.innerHTML = ''; // Clear existing content
+
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'overlay-header';
+
+    const title = document.createElement('h2');
+    title.textContent = 'Notenübersicht';
+    header.appendChild(title);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.className = 'close-btn';
+    closeBtn.addEventListener('click', () => overlay.style.display = 'none');
+    header.appendChild(closeBtn);
+
+    // Create average display
+    const averageDisplay = document.createElement('p');
+    averageDisplay.id = 'overlay-average';
+    averageDisplay.className = 'overlay-average';
+    
+    // Create grades container
+    const gradesContainer = document.createElement('div');
+    gradesContainer.id = 'grades-list-container';
+    gradesContainer.className = 'grades-container';
+
+    // Build overlay structure
+    overlayContent.appendChild(header);
+    overlayContent.appendChild(averageDisplay);
+    overlayContent.appendChild(gradesContainer);
+
+    // Populate with semester courses
+    const semesters = Array.from(document.querySelectorAll('.semester'));
+    semesters.forEach(semester => {
+        const semesterNumber = semester.dataset.number;
+        const courses = semester.querySelectorAll('.course');
+
+        if (courses.length > 0) {
+            const semesterSection = document.createElement('div');
+            semesterSection.className = 'semester-section';
+            
+            const semesterHeader = document.createElement('h3');
+            semesterHeader.textContent = `Semester ${semesterNumber}`;
+            
+            const list = document.createElement('ul');
+            list.className = 'grades-list';
+
+            courses.forEach(course => {
+                if (shouldIncludeCourse(course)) {
+                    const listItem = createGradeListItem(course);
+                    list.appendChild(listItem);
+                }
+            });
+
+            semesterSection.appendChild(semesterHeader);
+            semesterSection.appendChild(list);
+            gradesContainer.appendChild(semesterSection);
+        }
+    });
+
+    
+    // Update average display
+    updateOverlayAverage();
+    overlay.style.display = 'flex';
+}
+
+function shouldIncludeCourse(course) {
+    return course.dataset.isFreieWahl !== "true" &&
+           course.dataset.short_name !== "MK" &&
+           course.dataset.short_name !== "Pros";
+}
+
+function createGradeListItem(course) {
+    const listItem = document.createElement('li');
+    listItem.className = 'grade-item';
+    
+    const courseInfo = document.createElement('div');
+    courseInfo.className = 'course-info';
+    courseInfo.innerHTML = `
+        <span class="course-short">${course.dataset.short_name}</span>
+        <span class="course-name">${course.dataset.name}</span>
+    `;
+    
+    const gradeSelector = document.createElement('select');
+    gradeSelector.className = 'grade-select';
+    [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0].forEach(grade => {
+        const option = document.createElement('option');
+        option.value = grade;
+        option.textContent = grade.toFixed(1);
+        if (parseFloat(course.dataset.grade) === grade) option.selected = true;
+        gradeSelector.appendChild(option);
+    });
+
+    gradeSelector.addEventListener('change', (e) => {
+        course.dataset.grade = e.target.value;
+        updateAverage();
+        updateOverlayAverage();
+        saveStateToLocalStorage();
+    });
+
+    listItem.appendChild(courseInfo);
+    listItem.appendChild(gradeSelector);
+    return listItem;
+}
+
+function updateOverlayAverage() {
+    updateAverage();
+    const averageContainer = document.getElementById('average-display');
+    const average = averageContainer.textContent;
+    const averageDisplay = document.getElementById('overlay-average');
+    if (averageDisplay) {
+        averageDisplay.textContent = average;
+    }
+}
